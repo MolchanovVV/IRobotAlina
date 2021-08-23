@@ -1,0 +1,78 @@
+﻿@using IRobotAlina.Web.Models
+@model HomeViewModel
+@{
+    ViewData["Title"] = "Домашняя страница";
+}
+
+@*<div>
+        Detailed background job info can be found <a href="/hangfire">here</a>
+    </div>*@
+
+@if (!Model.AreAllConfigurationsValid)
+{
+    <div class="alert alert-danger">
+        Отсутствуют некоторые настройки для успешной работы обработчика писем. Пожалуйста, завершите настройку <a href="@Url.Action("Index", "Configuration")">здесь</a>
+    </div>
+}
+
+<h2>Статус</h2>
+@foreach (var job in Model.Jobs)
+{
+    <div>
+        <b>@job.Name</b> - @job.Status
+    </div>
+}
+<br />
+<br />
+
+@if (Model.TenderMails.Count != 0)
+{
+    <h2>Письма</h2>
+    <div>Количество писем - @Model.TenderMails.Count, количество тендеров - @Model.TotalTendersCount</div>
+    <table class="table table-striped">
+        <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Статус</th>
+            <th>Количество тендеров</th>
+        </tr>
+
+        @foreach (var item in Model.TenderMails.Data)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td><a href="@Url.Action("Index", "Tender", new { MailId = item.Id })">@(item.Name ?? "Письмо")</a></td>
+                <th>
+                    @if (item.IsProcessed)
+                    {
+                        @:Обработано
+                    }
+                    else
+                    {
+                        @:Обрабатывается
+                    }
+                </th>
+                <td>@item.TenderCount</td>
+            </tr>
+        }
+    </table>
+
+    <div>
+        <ul class="pagination">
+            <li class="page-item @(!Model.TenderMails.ShowFirst ? "disabled" : "")">
+                <a asp-route-CurrentPage="1" class="page-link"><i class="fas fa-fast-backward"></i></a>
+            </li>
+
+            <li class="page-item @(!Model.TenderMails.ShowPrevious ? "disabled" : "")">
+                <a asp-route-CurrentPage="@(Model.TenderMails.CurrentPage - 1)" class="page-link"><i class="fas fa-step-backward"></i></a>
+            </li>
+            <li class="page-item  @(!Model.TenderMails.ShowNext ? "disabled" : "")">
+                <a asp-route-CurrentPage="@(Model.TenderMails.CurrentPage + 1)" class="page-link"><i class="fas fa-step-forward"></i></a>
+            </li>
+
+            <li class="page-item  @(!Model.TenderMails.ShowLast ? "disabled" : "")">
+                <a asp-route-CurrentPage="@Model.TenderMails.TotalPages" class="page-link"><i class="fas fa-fast-forward"></i></a>
+            </li>
+        </ul>
+    </div>
+}

@@ -1,0 +1,33 @@
+﻿@using IRobotAlina.Web.Models
+@model CheckConfigurationViewModel 
+@{
+    ViewData["Title"] = "Проверка настроек";
+}
+
+<h1>Проверка настроек</h1>
+
+@if (Model.IsEWSWorking)
+{
+    <div class="alert alert-success">
+        Подключение к Exchange Server было успешным
+    </div>
+}
+else
+{
+    <div class="alert alert-danger">
+        Произошла ошибка во время подключения к Exchange Server. Сообщение: @Model.EWSErrorMessage
+    </div>
+}
+
+@if (Model.IsZakupkiAuthWorking)
+{
+    <div class="alert alert-success">
+        Авторизация на платформе Закупки.Контур была успешной
+    </div>
+}
+else
+{
+    <div class="alert alert-danger">
+        Произошла ошибка во время авторизации
+    </div>
+}

@@ -1,0 +1,77 @@
+﻿@using IRobotAlina.Web.Models
+
+@model TenderPaginationModel
+@{
+    ViewData["Title"] = "Тендеры";
+}
+
+@if (Model.MailName != null)
+{
+    <h2>Письмо "@Model.MailName.Trim()"</h2>
+}
+<h2>Тендеры</h2>
+
+@if (Model.Data.Count != 0)
+{
+    <div>Количество тендеров - @Model.Count, количество файлов - @Model.TotalFileCount</div>
+    <table class="table table-striped">
+        <tr>
+            @if (Model.MailId != null)
+            {
+                <th></th>
+            }
+            <th>Название</th>
+            <th>Ссылка</th>
+            @if (Model.MailId == null)
+            {
+                <th>Письмо</th>
+            }
+            <th>Количество файлов</th>
+        </tr>
+
+        @foreach (var item in Model.Data)
+        {
+            <tr>
+                @if (Model.MailId != null)
+                {
+                    <td>@item.Order</td>
+                }
+                <td><a href="@Url.Action("Details", "Tender", new { id = item.Id })">@(item.Name)</a></td>
+                <td>
+                    <a href="@item.Url">Ссылка</a>
+                </td>
+                @if (Model.MailId == null)
+                {
+                    <td>
+                        <a href="@Url.Action("Index", "Tender", new { mailId = item.MailId })">@item.MailName</a>
+                    </td>
+                }
+                <td>@item.FileCount</td>
+            </tr>
+        }
+    </table>
+
+    <div>
+        <ul class="pagination">
+            <li class="page-item @(!Model.ShowFirst ? "disabled" : "")">
+                <a asp-route-MailId="@Model.MailId" asp-route-CurrentPage="1" class="page-link"><i class="fas fa-fast-backward"></i></a>
+            </li>
+
+            <li class="page-item @(!Model.ShowPrevious ? "disabled" : "")">
+                <a asp-route-MailId="@Model.MailId" asp-route-CurrentPage="@(Model.CurrentPage - 1)" class="page-link"><i class="fas fa-step-backward"></i></a>
+            </li>
+            <li class="page-item  @(!Model.ShowNext ? "disabled" : "")">
+                <a asp-route-MailId="@Model.MailId" asp-route-CurrentPage="@(Model.CurrentPage + 1)" class="page-link"><i class="fas fa-step-forward"></i></a>
+            </li>
+
+            <li class="page-item  @(!Model.ShowLast ? "disabled" : "")">
+                <a asp-route-MailId="@Model.MailId" asp-route-CurrentPage="@Model.TotalPages" class="page-link"><i class="fas fa-fast-forward"></i></a>
+            </li>
+        </ul>
+    </div>
+
+}
+else
+{
+    <b>Здесь пока ничего нет!</b>
+}

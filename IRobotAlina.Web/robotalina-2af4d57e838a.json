@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "robotalina",
+  "private_key_id": "2af4d57e838aef101e459038305d60d33a2c75cd",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDXlHFkg/Ut/aZz\n3bXmQjRrOUF9Pjb7c7Son7n+hWPi/PBiaczofztXHrCmRYL1eMVpVES8+ZudM4bR\nUSzT832VOEj+IfyutlzhzNk2yBtqDwaOr+brGDEPUHr3daq84FC/dRLF5Zpb6SGM\nzm6GnfQF94UpzDpGuHcFZZwZnaPc9Z/yz4IAQ09BbwfE2EjADxx90eC32ljLQHqd\nENuzFCXuepkf0Q26gYU/WgvW04xSaW1ob0X6mpjt0kdDNUPA4V8UdHPMoMfcPXxd\nRbAq4Da25u+io+yf9wWLMgDdd+y7vb6tIpdURYevVN8pMVbysruHpPYqf1hTiMtI\n7RlaAjh1AgMBAAECggEADpU4z3EauIP4Ss20ZJFVbOxoWPHIs91Jmv+FDCnXTi9I\njou0JAUZTUUi83hvya2kAwJDjRoAdBOcetPYKbVGqT2vuFsxtdrZsR+TkQBb1GKU\nUbol74DJLs1FqDAyPskYxT7E6JSlyrJcReNf+CS+sVmjTSbGyWpoiLmtI9F1WHi4\nSIwJsVWQXPJuf7VpD++e3AlUYLyDM0NljIUNEHdDPMxqYQoeHL21RJmdMS9eS7+M\nn3eKNWFnzeH9MzLzv1/dS90EG7JDUwkpdua26HJJlDKuPtMy9Pk2nzVnUEMgk8ja\nos9uTet5n78xjoQz1xdMQWntc/ZKFacQlPQLHJ3sYQKBgQD3GiIjxOabQw/KvUcV\nRYHlDblbV5NvPLOBwwNXYdxp8eWnXi/lkMXFvabhExq3mJERRP+52m9utPx/7z03\neQzPeFAbKv6El+qSjFg7QMKFYVp6LsiOj2GCB2TNsOLuMxwzmCoasSkNdexDm4TE\ncjMg21rsnZ+GA8j1L8lTI+fFlQKBgQDfV7o+9KcGR7/dNRNqdhSKVjq2FJ9TA1Ig\nOXxea7uc+UvBlbbcQ8l2S+cBbi7dHwYshr+doItqed5ORKwLKiDVNXs9haYwMZJj\n19FcMK8fhxuvagsbTRO1/SbzES9qNIdcPamzdex5WGKZWNJydxP2Cv7f9ytvvk8P\nc+w728IvYQKBgQCUphr9i5jytAAPBZh6emru4TetdFyUIV8XY7ph2dQfw85Uxfto\nTZQ8JZ/7bGO5KMW0Lt7r7jT001nGmKQp9981+/msrkuYdk89w8HcO1QJqwwjznsG\nD8kn0MzaVFvf0c1YWGST1BmPKG5uKWNQTibl0C+9ggESPLqqjQm+wy3NlQKBgBvF\nV8Y+O4p/X28NC3YAartsz24WkF0NG6ggHcPL149EPFQ83njzANjxxS6bWb5q/iSJ\nOMhLzyoVLzxCM7ZLrbt1I/bZaHmzoEVD76dr8kqUTS/5mpnxcpL9gFtW9rNZBr/E\ndxZ2gknwYIo6zigngFbmtRx6Km+BlWkRe/1RbQrhAoGBAJ4+AopSyZ9t00YAgQ2T\n06ZjrZpIbsQjlYCVqN3KwIE4VXd5Kq+xI17WRoQQxp3P8qqQXnAlVDr+Qvu/tE1J\nAndRtSuLUMToKNw2kN9j0gx9EbOt2u1PoM4hnBaR+6v2aorQvrUnZB2T+DoBeyR5\nUr30w2DSMOO6O1yonUugetHH\n-----END PRIVATE KEY-----\n",
+  "client_email": "robotalina-vision@robotalina.iam.gserviceaccount.com",
+  "client_id": "118326674672613052227",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/robotalina-vision%40robotalina.iam.gserviceaccount.com"
+}

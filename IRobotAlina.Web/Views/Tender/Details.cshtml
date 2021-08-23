@@ -1,0 +1,56 @@
+﻿@using IRobotAlina.Web.Models
+
+@model TenderDetailsViewModel
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h2>@Model.Name</h2>
+<a href="@Model.Url">Сcылка</a>
+
+<h3>Файлы</h3>
+<style>
+    .archive td {
+        background-color: #1B998B;
+    }
+
+    .archive td a {
+        color: white !important;
+    }
+</style>
+@if (Model.Attachments.Any())
+{
+    <table class="table table-striped">
+        <tr>
+            <th colspan="2">Название</th>
+            <th ></th>
+        </tr>
+
+        @foreach (var item in Model.Attachments)
+        {
+            <tr class="@(item.NestedFiles.Count > 0 ? "archive" :"")">
+                <td colspan="2"><a href="@Url.Action("FileDetails", "Tender", new { id = item.Id })">@item.FileName</a></td>
+                <td >
+                    <a href="@Url.Action("Download", "Tender", new { id = item.Id })">Скачать</a>
+                </td>
+            </tr>
+            @if (item.NestedFiles.Count > 0)
+            {
+                @foreach (var nestedItem in item.NestedFiles)
+                {
+                    <tr>
+                        <td></td>
+                        <td><a href="@Url.Action("FileDetails", "Tender", new { id = nestedItem.Id })">@nestedItem.FileName</a></td>
+                        <td>
+                            <a href="@Url.Action("Download", "Tender", new { id = nestedItem.Id })">Скачать</a>
+                        </td>
+                    </tr>
+                }
+            }
+        }
+    </table>
+}
+else
+{
+    <h3>Нет файлов</h3>
+}

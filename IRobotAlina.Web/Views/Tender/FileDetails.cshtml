@@ -1,0 +1,23 @@
+﻿@using IRobotAlina.Web.Models
+
+@model TenderFileAttachmentDetailsViewModel
+@{
+    ViewData["Title"] = "FileDetails";
+}
+
+<h2>Файл "@Model.FileName"</h2>
+
+<a href="@Url.Action("Download", "Tender", new { id = Model.Id })">Скачать</a>
+
+<h3>Содержание</h3>
+@if (!string.IsNullOrWhiteSpace(Model.ExtractedText))
+{
+    <code>
+        @Model.ExtractedText
+    </code>
+}
+else
+{
+    <div>Содержание для данного формата недоступно</div>
+}
+

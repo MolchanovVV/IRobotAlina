@@ -1,0 +1,59 @@
+﻿@model IRobotAlina.Web.Models.ConfigurationViewModel
+@{
+    ViewData["Title"] = "Настройки";
+}
+
+<h2>Настройки</h2>
+
+@using (Html.BeginForm())
+{
+<div class="row">
+    <div class="col-12">
+        <h4>Exchange Web Services</h4>
+        <div>Данные, необходимые для авторизации в сервере Exchange. Требуется Autodiscovery</div>
+        <div class="row">
+            <div class="col-4 form-group">
+                @Html.LabelFor(x => x.EWSIP, new { @class = "control-label" })
+                @Html.TextBoxFor(x => x.EWSIP, new { @class = "form-control" })
+            </div>
+            <div class="col-4 form-group">
+                @Html.LabelFor(x => x.EWSLogin, new { @class = "control-label" })
+                @Html.TextBoxFor(x => x.EWSLogin, new { @class = "form-control" })
+            </div>
+            <div class="col-4 form-group">
+                @Html.LabelFor(x => x.EWSPassword, new { @class = "control-label" })
+                @Html.TextBoxFor(x => x.EWSPassword, new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+    CheckSettingsCheckSettings
+    <div class="col-12">
+        <h4>Фильтрация почты</h4>
+        <div>После обработки письмо с данным отправителем будет помещено в папку "Processed". Можно указать несколько имейлов отправителей, разделенные запятыми.</div>
+        <div class="row">
+            <div class="col-4 form-group">
+                @Html.LabelFor(x => x.MailHostNames, new { @class = "control-label" })
+                @Html.TextBoxFor(x => x.MailHostNames, new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <h4>Закупки.Контур</h4>
+        <div>Данные для авторизации на <a href="https://auth.kontur.ru/?back=http%3A%2F%2Fzakupki.kontur.ru%2FGrid&customize=zakupki&tabs=1%2C1%2C0%2C0">платформе</a></div>
+        <div class="row">
+            <div class="col-4 form-group">
+                @Html.LabelFor(x => x.ZakupkiEmail, new { @class = "control-label" })
+                @Html.TextBoxFor(x => x.ZakupkiEmail, new { @class = "form-control" })
+            </div>
+            <div class="col-4 form-group">
+                @Html.LabelFor(x => x.ZakupkiPassword, new { @class = "control-label" })
+                @Html.TextBoxFor(x => x.ZakupkiPassword, new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+</div>
+
+    <button type="submit" class="btn btn-info">Сохранить</button>
+    <a href="@Url.Action("CheckSettings")">Проверить настройки</a>
+}
+
