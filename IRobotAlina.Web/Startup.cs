@@ -49,7 +49,7 @@ namespace TenderDocumentsScraper
             services.AddHangfire(x => x.UseSqlServerStorage(Configuration.GetConnectionString("DefaultConnection")));
             services.AddHangfireServer(options =>
             {
-                options.WorkerCount = Environment.ProcessorCount * 10;
+                options.WorkerCount = Environment.ProcessorCount * 5;
                 options.Queues = new[] { "alpha", "beta", "default" };
             });
 
