@@ -12,16 +12,7 @@
 	</PropertyGroup>
 	<ItemGroup>
 	  <Compile Remove="Services\TenderLinkProvider\PersistentTenderMailProvider.cs" />
-	</ItemGroup>
-	<ItemGroup>
-	  <Content Remove="robotalina-2af4d57e838a.json" />
-	</ItemGroup>
-	<ItemGroup>
-	  <None Include="robotalina-2af4d57e838a.json">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
-	</ItemGroup>
-
+	</ItemGroup>		
 	<ItemGroup>
 		<PackageReference Include="EAGetMail" Version="5.2.2.2" />
 		<PackageReference Include="Hangfire" Version="1.7.24" />
