@@ -10,7 +10,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using IRobotAlina.Web.Services.PrepareExcelFile;
 
 namespace IRobotAlina.Web.Services.TenderPlatformProcessor
@@ -62,41 +61,26 @@ namespace IRobotAlina.Web.Services.TenderPlatformProcessor
                     {
                         string downloadFolderPath = Path.Combine(Environment.GetEnvironmentVariable("USERPROFILE"), "Downloads");
 
-                        string filePath = Directory.GetFiles(downloadFolderPath).Where(f => Path.GetExtension(f) == ".xlsx" || Path.GetFileName(f).Contains("Контур")).OrderBy(f => File.GetLastWriteTime(f))?.LastOrDefault();
-                        string fileName = Path.GetFileName(filePath);
-
-                        string fileMainStorageConture = Path.Combine(Environment.Current​Directory, "Контур", "Оригиналы");
+                        string filePath = Directory.GetFiles(downloadFolderPath).Where(p => (Path.GetExtension(p) == ".xls" || Path.GetExtension(p) == ".xlsx") &&  Path.GetFileName(p).Contains("Контур")).OrderBy(p => File.GetLastWriteTime(p))?.LastOrDefault();
+                        DateTime lastWriteTime = File.GetLastWriteTime(filePath);
+                        string fileName = string.Concat(Path.GetFileNameWithoutExtension(filePath), "_", lastWriteTime.ToString("HH:mm:ss") ?? DateTime.Now.ToString("HH:mm:ss"), Path.GetExtension(filePath));
+                                                                                
+                        string fileMainStorageConture = Path.Combine(Environment.Current​Directory, "Контур");
 
                         if (!Directory.Exists(fileMainStorageConture))
                             Directory.CreateDirectory(fileMainStorageConture);
 
                         File.Move(filePath, Path.Combine(fileMainStorageConture, fileName), true);
-
-                        string fileWorkStorageConture = Path.Combine(Environment.Current​Directory, "Контур", "Рабочие");
-
-                        if (!Directory.Exists(fileWorkStorageConture))
-                            Directory.CreateDirectory(fileWorkStorageConture);
-
-                        string workFilePath = Path.Combine(fileWorkStorageConture, fileName);
-                        File.Copy(Path.Combine(fileMainStorageConture, fileName), workFilePath, true);
-
+                        
                         try
                         {                            
-                            await prepareExcelFile.Prepare(tenderMail.Id.Value, fileName, File.ReadAllBytes(workFilePath));
+                            await prepareExcelFile.Prepare(tenderMail.Id.Value, fileName, File.ReadAllBytes(Path.Combine(fileMainStorageConture, fileName)));
                         }
                         catch(Exception ex)
                         {
                             string ee = ex.Message;
                         }
                     }
-
-
-                    //var fileTenderAdditionalPart = await downloadFileClient.DownloadFile(linkFileTenderAdditionalPart, scraper.GetCookies());
-
-                    //if (fileTenderAdditionalPart != null)
-                    //{
-                    //    File.WriteAllBytes(@"C:\Test\fileTenderAdditionalPart.xls", fileTenderAdditionalPart);
-                    //}
                 }
                                 
                 int linkIdx = 1;
@@ -156,20 +140,14 @@ namespace IRobotAlina.Web.Services.TenderPlatformProcessor
                                 {
                                     attachment.Status = ETenderFileAttachmentStatus.InProgress; // если мы наткнулись на тип файла, который не имеет обработчика
                                     await saveTenderFile.Update(attachment);                                    
-                                }
-
-                                // await saveTenderFile.Update(attachment);
-
-                                // await saveTenderFile.Save(attachment);
+                                }                                
                             }
                         }
                     }                    
                 }
 
                 linkProvider.MarkAsCompleted(tenderMail);
-            }
-
-            //linkProvider.MarkAsCompleted(tenderMails);
+            }            
         }
     }
 }
