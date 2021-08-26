@@ -63,7 +63,7 @@ namespace IRobotAlina.Web.Services.TenderPlatformProcessor
 
                         string filePath = Directory.GetFiles(downloadFolderPath).Where(p => (Path.GetExtension(p) == ".xls" || Path.GetExtension(p) == ".xlsx") &&  Path.GetFileName(p).Contains("Контур")).OrderBy(p => File.GetLastWriteTime(p))?.LastOrDefault();
                         DateTime lastWriteTime = File.GetLastWriteTime(filePath);
-                        string fileName = string.Concat(Path.GetFileNameWithoutExtension(filePath), "_", lastWriteTime.ToString("HH:mm:ss") ?? DateTime.Now.ToString("HH:mm:ss"), Path.GetExtension(filePath));
+                        string fileName = string.Concat(Path.GetFileNameWithoutExtension(filePath), "_", lastWriteTime.ToString("HH-mm-ss") ?? DateTime.Now.ToString("HH-mm-ss"), Path.GetExtension(filePath));
                                                                                 
                         string fileMainStorageConture = Path.Combine(Environment.Current​Directory, "Контур");
 
