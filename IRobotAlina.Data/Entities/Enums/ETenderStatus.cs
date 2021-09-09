@@ -2,6 +2,7 @@
 {
     public enum ETenderStatus
     {
+        Unknown,
         New,
         Canceled,
         Closed

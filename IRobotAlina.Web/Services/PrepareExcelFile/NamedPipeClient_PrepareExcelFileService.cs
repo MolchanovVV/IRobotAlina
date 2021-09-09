@@ -23,7 +23,7 @@ namespace IRobotAlina.Web.Services.PrepareExcelFile
             logger = scope.ServiceProvider.GetService<ILogger<NamedPipeClient_PrepareExcelFileService>>();
         }
 
-        public async Task<Exl_DataMessage> SendRequestToPrepareExcelFile(int mailId, string fileName, byte[] content)
+        public async Task<Exl_DataMessage> SendRequestToPrepareExcelFile(int mailId, string fileName, byte[] content)        
         {
             this.mailId = mailId;
             this.fileName = fileName;
@@ -47,7 +47,7 @@ namespace IRobotAlina.Web.Services.PrepareExcelFile
                     };
                 }
 
-                return await Task.FromResult(dataMessage);
+                return await Task.FromResult(dataMessage);                
             }
             finally
             {
@@ -82,7 +82,8 @@ namespace IRobotAlina.Web.Services.PrepareExcelFile
                         case DataMessageSettings.MessageType.Exl_Response:
                         case DataMessageSettings.MessageType.Error:
                             dataMessage.type = exl_message.type;
-                            dataMessage.content = exl_message.content;
+                            dataMessage.content = null;
+                            dataMessage.serviceResult = exl_message.serviceResult;
                             dataMessage.errMsg = exl_message.errMsg;
 
                             namedPipeClient.Stop();

@@ -1,5 +1,4 @@
-﻿using IRobotAlina.Data.Entities;
-using IRobotAlina.Web.Models;
+﻿using IRobotAlina.Web.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

@@ -10,6 +10,7 @@ using IRobotAlina.Web.Services.PrepareExcelFile;
 using IRobotAlina.Web.Services.Scraper;
 using IRobotAlina.Web.Services.Storage;
 using IRobotAlina.Web.Services.TenderLinkProvider;
+using IRobotAlina.Web.Services.TenderMailFiles;
 using IRobotAlina.Web.Services.TenderPlatformProcessor;
 using IRobotAlina.Web.Services.TextExtractor;
 using Microsoft.AspNetCore.Builder;
@@ -86,6 +87,8 @@ namespace TenderDocumentsScraper
             services.AddScoped<IPrepareExcelFile, PrepareExcelFile>();
             services.AddScoped<NamedPipeClient_PrepareExcelFileService>();
             services.AddScoped<OuterTextExtractionService>();
+            services.AddScoped<ITenderMailFileProvider, TenderMailFileProvider>();
+            services.AddScoped<IParseTenderAdditionalPartExcelData, ParseTenderAdditionalPartExcelData>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,11 +1,11 @@
 ﻿using IRobotAlina.Web.Services.Configuration;
-using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -83,11 +83,23 @@ namespace IRobotAlina.Web.Services.Scraper
             if (await GetStatusCode() != HttpStatusCode.OK)
                 return null;
 
+            var tenderNumberBy = By.XPath("//p[contains(@class, \"tender_title\")]");
+            Wait(x => webDriver.FindElements(tenderNumberBy).Count > 0, 15);
+            var tmpTenderNumber = webDriver.FindElement(tenderNumberBy)?.Text;
+
+            string tenderNumber = null;
+            int index = tmpTenderNumber.IndexOf("№");
+            if (index >= 0)
+            {
+                tenderNumber = tmpTenderNumber.Substring(index, tmpTenderNumber.Length - index);
+
+                tenderNumber = tenderNumber.Replace("№", "").Trim();
+            }
+
             var tenderTitleBy = By.XPath("//div[@class=\"blockTitle blockTitle__main\"]/h1");                                                       
-
             Wait(x => webDriver.FindElements(tenderTitleBy).Count > 0, 15);
-
             var tenderTitle = webDriver.FindElement(tenderTitleBy)?.Text;
+
             var tenderDescription = new StringBuilder();
 
             CloseSurveyPopupIfOpen();
@@ -103,10 +115,11 @@ namespace IRobotAlina.Web.Services.Scraper
             }
                        
             return new TenderDto()
-            {
-                Documents = GetDocumentUrls(tenderUrl),
+            {                
+                Number = tenderNumber,
                 Name = tenderTitle,
-                Description = tenderDescription.ToString()
+                Description = tenderDescription.ToString(),
+                Documents = GetDocumentUrls(tenderUrl)
             };
         }
 
@@ -185,29 +198,27 @@ namespace IRobotAlina.Web.Services.Scraper
                 yield return new System.Net.Cookie(cookie.Name, cookie.Value, cookie.Path, cookie.Domain);
             }
         }
-        
-        public async Task<bool> DownloadFileTendersAdditionalPart(string url)
+
+        //public async Task<bool> DownloadFileTendersAdditionalPart(string url)        
+        public void DownloadFileTendersAdditionalPart(string url)
         {
             if (string.IsNullOrWhiteSpace(url))
-                return false;
+                return;
             
             if (!isInitialized)
                 Initialize();
 
-            url = url.Replace("&amp;", "&");
-
+            url = url.Replace("&amp;", "&");            
+            
             if (webDriver.Url != url)
                 webDriver.Url = url;
+            
+            //if (await GetStatusCode() != HttpStatusCode.OK)
+            //    return false;
+            
+            Thread.Sleep(2000);
 
-            if (await GetStatusCode() != HttpStatusCode.OK)
-                return false;
-
-            var xpDownloadIsComplite = By.XPath("//div[@id=\"message\"]//a[contains(@class, \"js-excel\")]");            
-            Wait(x => x.FindElements(xpDownloadIsComplite).Count > 0);
-
-            Thread.Sleep(1500);
-
-            return true;
+            //return true;
         }
 
         public void Dispose()

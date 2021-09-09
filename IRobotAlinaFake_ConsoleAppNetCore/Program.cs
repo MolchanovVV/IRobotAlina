@@ -25,7 +25,7 @@ namespace IRobotAlinaFake_ConsoleAppNetCore
             string folderLastErrors = Path.Combine(folder, "_LastErrors");
             string folderOneFile = Path.Combine(folder, "_OneFile");
             string oneFileName = Path.Combine(folderOneFile, "1.RPR.0120.23UBZ.0.KM.LC0001_C01.pdf");
-            string excelFile = @"C:\Test\_xls\Контур.Закупки_10.04.2021.xlsx";
+            string excelFile = @"C:\Test\_xls\Контур.Закупки_08.09.2021.xlsx";
             string folderCableJournal = Path.Combine(folder, "_CableJournal");
 
 
@@ -96,7 +96,7 @@ namespace IRobotAlinaFake_ConsoleAppNetCore
                 {
                     attacmentFileName = Path.GetFileName(pathFile);
                     attacmentContent = File.ReadAllBytes(pathFile);
-
+                    
                     ocrClient = new NamedPipeClient<DataMessage>(Constants.PIPE_NAME, applicationName: "IRobotAlinaFake") { AutoReconnect = false };
                     ocrClient.ServerMessage += OnServerMessage;                    
                     ocrClient.Error += OnError;
@@ -189,8 +189,8 @@ namespace IRobotAlinaFake_ConsoleAppNetCore
 
                         if (message.type == DataMessageSettings.MessageType.Exl_Response)
                         {                            
-                            string preparedFileName = Path.Combine(@"C:\Test\_xls\_resultPrepared", string.Concat(Path.GetFileNameWithoutExtension(attacmentFileName), "_Prepared", ".xlsx"));
-                            File.WriteAllBytes(preparedFileName, ((Exl_DataMessage)message).content);
+                            string preparedFileName = Path.Combine(@"C:\Test\_xls\result", string.Concat(Path.GetFileNameWithoutExtension(attacmentFileName), ".txt"));
+                            File.WriteAllText(preparedFileName, ((Exl_DataMessage)message).serviceResult);
                         }
 
                         ocrClient?.Stop();

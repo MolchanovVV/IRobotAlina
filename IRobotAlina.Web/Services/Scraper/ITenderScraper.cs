@@ -23,7 +23,8 @@ namespace IRobotAlina.Web.Services.Scraper
     }
 
     public interface IZakupkiKonturScraper : ITenderScraper
-    {        
-        public Task<bool> DownloadFileTendersAdditionalPart(string url);
+    {
+        //public Task<bool> DownloadFileTendersAdditionalPart(string url);
+        public void DownloadFileTendersAdditionalPart(string url);
     }
 }

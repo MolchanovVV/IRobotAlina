@@ -1,16 +1,18 @@
 ﻿using IRobotAlina.Data.Entities;
-using IRobotAlina.Web.Utils;
 using IRobotAlina.Web.Services.Builder;
 using IRobotAlina.Web.Services.Download;
 using IRobotAlina.Web.Services.Files;
+using IRobotAlina.Web.Services.PrepareExcelFile;
 using IRobotAlina.Web.Services.Scraper;
 using IRobotAlina.Web.Services.Storage;
+using IRobotAlina.Web.Services.TenderMailFiles;
 using IRobotAlina.Web.Services.TextExtractor;
+using IRobotAlina.Web.Utils;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using IRobotAlina.Web.Services.PrepareExcelFile;
 
 namespace IRobotAlina.Web.Services.TenderPlatformProcessor
 {
@@ -24,7 +26,10 @@ namespace IRobotAlina.Web.Services.TenderPlatformProcessor
         private readonly FileService fileService;
         private readonly IDocumentTextExtractorFactory documentTextExtractorFactory;
         private readonly IPrepareExcelFile prepareExcelFile;
-        
+        private readonly ITenderMailFileProvider tenderMailFileProvider;
+        private readonly IParseTenderAdditionalPartExcelData parseTenderAdditionalPartExcelData;
+
+
         public ZakupkiKonturProcessor(
             IZakupkiKonturScraper scraper,
             ISaveTenderFileAttachment saveTenderFile,
@@ -33,7 +38,9 @@ namespace IRobotAlina.Web.Services.TenderPlatformProcessor
             DownloadFileClient downloadFileClient,
             FileService fileService,
             IDocumentTextExtractorFactory documentTextExtractorFactory,
-            IPrepareExcelFile prepareExcelFile
+            IPrepareExcelFile prepareExcelFile,
+            ITenderMailFileProvider tenderMailFileProvider,
+            IParseTenderAdditionalPartExcelData parseTenderAdditionalPartExcelData
         )
         {
             this.scraper = scraper;
@@ -44,6 +51,8 @@ namespace IRobotAlina.Web.Services.TenderPlatformProcessor
             this.fileService = fileService;
             this.documentTextExtractorFactory = documentTextExtractorFactory;
             this.prepareExcelFile = prepareExcelFile;
+            this.tenderMailFileProvider = tenderMailFileProvider;
+            this.parseTenderAdditionalPartExcelData = parseTenderAdditionalPartExcelData;
         }
 
         public async Task Execute()
@@ -55,34 +64,41 @@ namespace IRobotAlina.Web.Services.TenderPlatformProcessor
                 string linkFileTenderAdditionalPart = tenderMail.Links.Where(p => p.Type == Mails.EMailLinkType.Download).Select(s => s.Link)?.FirstOrDefault();
                 if (!string.IsNullOrWhiteSpace(linkFileTenderAdditionalPart))
                 {
-                    var resDownload = await scraper.DownloadFileTendersAdditionalPart(linkFileTenderAdditionalPart);
+                    //bool resDownload = await scraper.DownloadFileTendersAdditionalPart(linkFileTenderAdditionalPart);
+                    scraper.DownloadFileTendersAdditionalPart(linkFileTenderAdditionalPart);
 
-                    if (resDownload)
-                    {
-                        string downloadFolderPath = Path.Combine(Environment.GetEnvironmentVariable("USERPROFILE"), "Downloads");
+                    string downloadFolderPath = Path.Combine(Environment.GetEnvironmentVariable("USERPROFILE"), "Downloads");
 
-                        string filePath = Directory.GetFiles(downloadFolderPath).Where(p => (Path.GetExtension(p) == ".xls" || Path.GetExtension(p) == ".xlsx") &&  Path.GetFileName(p).Contains("Контур")).OrderBy(p => File.GetLastWriteTime(p))?.LastOrDefault();
-                        DateTime lastWriteTime = File.GetLastWriteTime(filePath);
-                        string fileName = string.Concat(Path.GetFileNameWithoutExtension(filePath), "_", lastWriteTime.ToString("HH-mm-ss") ?? DateTime.Now.ToString("HH-mm-ss"), Path.GetExtension(filePath));
-                                                                                
+                    string sourceFileName = Directory.GetFiles(downloadFolderPath)
+                        .Where(p =>
+                            (Path.GetExtension(p) == ".xls" || Path.GetExtension(p) == ".xlsx") &&
+                            Path.GetFileName(p).Contains("Контур")
+                        )
+                        .OrderBy(p => File.GetLastWriteTime(p))?.LastOrDefault();
+
+                    if (!string.IsNullOrEmpty(sourceFileName))
+                    {                        
+                        DateTime lastWriteTime = Directory.GetLastWriteTime(sourceFileName);
+                        string destFileName = $"{Path.GetFileNameWithoutExtension(sourceFileName)} ({lastWriteTime.ToString("dd.MM.yyyy HH-mm-ss")}){Path.GetExtension(sourceFileName)}";
+
                         string fileMainStorageConture = Path.Combine(Environment.Current​Directory, "Контур");
 
                         if (!Directory.Exists(fileMainStorageConture))
                             Directory.CreateDirectory(fileMainStorageConture);
 
-                        File.Move(filePath, Path.Combine(fileMainStorageConture, fileName), true);
-                        
-                        try
-                        {                            
-                            await prepareExcelFile.Prepare(tenderMail.Id.Value, fileName, File.ReadAllBytes(Path.Combine(fileMainStorageConture, fileName)));
-                        }
-                        catch(Exception ex)
-                        {
-                            string ee = ex.Message;
-                        }
+                        File.Move(sourceFileName, Path.Combine(fileMainStorageConture, destFileName), true);
+
+                        await prepareExcelFile.Prepare(tenderMail.Id.Value, destFileName, File.ReadAllBytes(Path.Combine(fileMainStorageConture, destFileName)));
                     }
                 }
-                                
+                
+                string parsedData = tenderMailFileProvider.GetTenderMailFiles(tenderMail.Id.Value)
+                    ?.Where(p => p.Type == Data.Entities.Enums.ETenderMailFileType.TenderAdditionalPart && p.Status == Data.Entities.Enums.ETenderMailFileStatus.Successful)
+                    ?.Select(s => s.ParsedData)
+                    ?.FirstOrDefault();
+
+                List<Tender> tenderAdditionalParts = parseTenderAdditionalPartExcelData.GetTenderAdditionalPart(parsedData);
+
                 int linkIdx = 1;
 
                 foreach (var tenderLink in tenderMail.Links.Where(p => p.Type == Mails.EMailLinkType.Typical).Select(s => s.Link))
@@ -94,17 +110,17 @@ namespace IRobotAlina.Web.Services.TenderPlatformProcessor
 
                     var tmpTender = new Tender()
                     {
-                        Url = tenderLink,
-                        Name = tenderInfo.Name,
                         TenderMailId = tenderMail.Id.Value,
+                        Number = tenderInfo.Number,
+                        Name = tenderInfo.Name,
+                        Url = tenderLink,
                         Description = tenderInfo.Description,
-                        Order = linkIdx++,
+                        Order = linkIdx++
                     };
 
-                    var tender = tenderBuilder.GetOrCreate(tmpTender);
+                    var tender = tenderBuilder.GetOrCreate(tmpTender, tenderAdditionalParts.Where(p => p.Number == tmpTender.Number)?.FirstOrDefault());
 
                     var fileAttachmentLinks = tenderInfo.Documents;
-
                     var newFileAttachmentLinks = fileAttachmentLinks
                         .Where(x => !tender.rootFiles.Any(y => y.Name == x.FileName))
                         .ToList(); // save only files that do not exist yet
@@ -133,21 +149,22 @@ namespace IRobotAlina.Web.Services.TenderPlatformProcessor
                                 if (documentTextExtractor != null)
                                 {
                                     attachment.Status = ETenderFileAttachmentStatus.InProgress;
-                                    await documentTextExtractor.Extract(attachment);                                    
+                                    await documentTextExtractor.Extract(attachment);
                                 }
 
-                                if (attachment.Status == null)
+                                if (attachment.Status == ETenderFileAttachmentStatus.Unknown)
                                 {
-                                    attachment.Status = ETenderFileAttachmentStatus.InProgress; // если мы наткнулись на тип файла, который не имеет обработчика
-                                    await saveTenderFile.Update(attachment);                                    
-                                }                                
+                                    attachment.Status = ETenderFileAttachmentStatus.NotProcessed; // если мы наткнулись на тип файла, который не имеет обработчика
+                                    await saveTenderFile.Update(attachment);
+                                }
                             }
                         }
-                    }                    
+                    }
                 }
 
+
                 linkProvider.MarkAsCompleted(tenderMail);
-            }            
+            }
         }
     }
 }
