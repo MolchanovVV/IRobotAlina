@@ -24,7 +24,7 @@ namespace IRobotAlinaFake_ConsoleAppNetCore
             string folderImage = Path.Combine(folder, "_Image");
             string folderLastErrors = Path.Combine(folder, "_LastErrors");
             string folderOneFile = Path.Combine(folder, "_OneFile");
-            string oneFileName = Path.Combine(folderOneFile, "1.RPR.0120.23UBZ.0.KM.LC0001_C01.pdf");
+            string oneFileName = Path.Combine(folderOneFile, "ТУ 3500-014-12380249-2017 Провода и шнуры смоленск.pdf");
             string excelFile = @"C:\Test\_xls\Контур.Закупки_08.09.2021.xlsx";
             string folderCableJournal = Path.Combine(folder, "_CableJournal");
 
@@ -122,7 +122,8 @@ namespace IRobotAlinaFake_ConsoleAppNetCore
                 }
                 finally
                 {
-                    ocrClient?.Stop();                    
+                    ocrClient?.Stop();
+                    ocrClient = null;
                 }
             }
 
@@ -166,10 +167,7 @@ namespace IRobotAlinaFake_ConsoleAppNetCore
                     Console.WriteLine($"Отправлено сообщение: {DataMessageSettings.TypeStr[newType]}");
                 }
                 else
-                {
-                    //if (!(message is TE_DataMessage te_message))
-                    //    throw new Exception($"Неизвестный класс сообщения, [{message.GetType().Name}].");
-
+                {                    
                     if (
                         message.type == DataMessageSettings.MessageType.TE_Rejection ||
                         message.type == DataMessageSettings.MessageType.TE_Response || 
@@ -193,7 +191,9 @@ namespace IRobotAlinaFake_ConsoleAppNetCore
                             File.WriteAllText(preparedFileName, ((Exl_DataMessage)message).serviceResult);
                         }
 
-                        ocrClient?.Stop();
+                        if (connection.IsConnected)
+                            connection.Close();
+                        //ocrClient?.Stop();
                     }
                     else
                     {
@@ -210,6 +210,7 @@ namespace IRobotAlinaFake_ConsoleAppNetCore
         private static void OnError(Exception ex)
         {
             ocrClient?.Stop();
+            ocrClient = null;
             Console.WriteLine($"ОШИБКА: {ex.Message}");
         }        
     }
