@@ -29,7 +29,10 @@ namespace IRobotAlina.Web.Services.PrepareExcelFile
 
             Tender newTenderAdditionalPart = null;
             bool resTryParseExact;
-            string[] formats = { "dd.MM.yyyy", "dd.MM.yyyy h:mm", "dd.MM.yyyy hh:mm", "dd.MM.yyyy hh:mm:ss", "dd.MM.yyyy H:mm", "dd.MM.yyyy HH:mm", "dd.MM.yyyy HH:mm:ss" };
+            string[] formats = { 
+                "dd.MM.yyyy", 
+                "dd.MM.yyyy h:mm", "dd.MM.yyyy h:mm:ss", "dd.MM.yyyy hh:mm", "dd.MM.yyyy hh:mm:ss", 
+                "dd.MM.yyyy H:mm", "dd.MM.yyyy H:mm:ss", "dd.MM.yyyy HH:mm", "dd.MM.yyyy HH:mm:ss" };
             DateTime parsedDate;
 
             foreach (var group in TenderAdditionalPartExcelCellInfos.GroupBy(p => p.rowNumber))
@@ -38,7 +41,8 @@ namespace IRobotAlina.Web.Services.PrepareExcelFile
 
                 foreach (var item in group)
                 {
-                    string value = item.value?.Trim() ?? null;
+                    string value = !string.IsNullOrWhiteSpace(item.value) ? item.value.Trim() : null;
+                    
                     switch (item.sectionName.ToLowerInvariant())
                     {
                         case "закупка":
@@ -72,7 +76,7 @@ namespace IRobotAlina.Web.Services.PrepareExcelFile
                                     break;
 
                                 case "дата публикации":
-                                    resTryParseExact = DateTime.TryParseExact(value, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate);
+                                    resTryParseExact = DateTime.TryParseExact(value, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate);
 
                                     if (resTryParseExact)
                                         newTenderAdditionalPart.Purchase.PublicationDate = parsedDate;

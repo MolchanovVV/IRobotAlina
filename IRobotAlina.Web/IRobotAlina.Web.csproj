@@ -30,13 +30,13 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.10" />
-		<PackageReference Include="Microsoft.Graph" Version="4.5.0" />
+		<PackageReference Include="Microsoft.Graph" Version="4.6.0" />
 		<PackageReference Include="Microsoft.Graph.Core" Version="2.0.5" />
 		<PackageReference Include="Microsoft.Identity.Client" Version="4.36.1" />
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.4" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
-		<PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="93.0.4577.6300" />
+		<PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="94.0.4606.4101" />
 	</ItemGroup>
 
 

@@ -25,7 +25,7 @@ namespace IRobotAlinaFake_ConsoleAppNetCore
             string folderLastErrors = Path.Combine(folder, "_LastErrors");
             string folderOneFile = Path.Combine(folder, "_OneFile");
             string oneFileName = Path.Combine(folderOneFile, "ТУ 3500-014-12380249-2017 Провода и шнуры смоленск.pdf");
-            string excelFile = @"C:\Test\_xls\Контур.Закупки_08.09.2021.xlsx";
+            string excelFile = @"C:\Test\_xls\Контур.Закупки_18.09.2021.xlsx";
             string folderCableJournal = Path.Combine(folder, "_CableJournal");
 
 
@@ -187,13 +187,12 @@ namespace IRobotAlinaFake_ConsoleAppNetCore
 
                         if (message.type == DataMessageSettings.MessageType.Exl_Response)
                         {                            
-                            string preparedFileName = Path.Combine(@"C:\Test\_xls\result", string.Concat(Path.GetFileNameWithoutExtension(attacmentFileName), ".txt"));
+                            string preparedFileName = Path.Combine(@"C:\Test\_xls", string.Concat(Path.GetFileNameWithoutExtension(attacmentFileName), ".txt"));
                             File.WriteAllText(preparedFileName, ((Exl_DataMessage)message).serviceResult);
                         }
 
                         if (connection.IsConnected)
-                            connection.Close();
-                        //ocrClient?.Stop();
+                            connection.Close();                        
                     }
                     else
                     {

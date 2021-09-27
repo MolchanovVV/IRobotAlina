@@ -42,10 +42,11 @@ namespace IRobotAlina.Web.Services.Scraper
         /// When authenticated flips isIntialized to true, so we can use same instance multiple times
         /// </summary>
         public void Initialize()
-        {
-            var credentials = credentialsProvider.GetCredentials();
-
-            webDriver = new ChromeDriver
+        {            
+            ChromeOptions options = new ChromeOptions();
+            options.AddArgument("no-sandbox");
+                        
+            webDriver = new ChromeDriver(ChromeDriverService.CreateDefaultService(), options)
             {
                 Url = baseUrl
             };
@@ -55,6 +56,7 @@ namespace IRobotAlina.Web.Services.Scraper
             var passwordBy = By.XPath("//input[@type=\"password\"]");
             Wait(x => x.FindElements(emailBy).Count > 0);
 
+            var credentials = credentialsProvider.GetCredentials();
             webDriver.FindElement(emailBy).SendKeys(credentials.Email);
             webDriver.FindElement(passwordBy).SendKeys(credentials.Password);
 
