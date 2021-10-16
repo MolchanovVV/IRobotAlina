@@ -5,6 +5,7 @@ using IRobotAlina.Web.Services.Files;
 using IRobotAlina.Web.Services.PrepareExcelFile;
 using IRobotAlina.Web.Services.Scraper;
 using IRobotAlina.Web.Services.Storage;
+using IRobotAlina.Web.Services.TenderMailContentService;
 using IRobotAlina.Web.Services.TenderMailFiles;
 using IRobotAlina.Web.Services.TextExtractor;
 using IRobotAlina.Web.Utils;
@@ -28,7 +29,7 @@ namespace IRobotAlina.Web.Services.TenderPlatformProcessor
         private readonly IPrepareExcelFile prepareExcelFile;
         private readonly ITenderMailFileProvider tenderMailFileProvider;
         private readonly IParseTenderAdditionalPartExcelData parseTenderAdditionalPartExcelData;
-
+        private readonly ITenderMailContentService tenderMailContentService;
 
         public ZakupkiKonturProcessor(
             IZakupkiKonturScraper scraper,
@@ -40,7 +41,8 @@ namespace IRobotAlina.Web.Services.TenderPlatformProcessor
             IDocumentTextExtractorFactory documentTextExtractorFactory,
             IPrepareExcelFile prepareExcelFile,
             ITenderMailFileProvider tenderMailFileProvider,
-            IParseTenderAdditionalPartExcelData parseTenderAdditionalPartExcelData
+            IParseTenderAdditionalPartExcelData parseTenderAdditionalPartExcelData,
+            ITenderMailContentService tenderMailContentService
         )
         {
             this.scraper = scraper;
@@ -53,6 +55,7 @@ namespace IRobotAlina.Web.Services.TenderPlatformProcessor
             this.prepareExcelFile = prepareExcelFile;
             this.tenderMailFileProvider = tenderMailFileProvider;
             this.parseTenderAdditionalPartExcelData = parseTenderAdditionalPartExcelData;
+            this.tenderMailContentService = tenderMailContentService;
         }
 
         public async Task Execute()
@@ -162,9 +165,11 @@ namespace IRobotAlina.Web.Services.TenderPlatformProcessor
                     }
                 }
 
-
                 linkProvider.MarkAsCompleted(tenderMail);
             }
+
+            List<int> mailIds = tenderMails.Where(p => p.Id.HasValue).Select(s => s.Id.Value).ToList();
+            tenderMailContentService.CreateTenderMailContent(mailIds);
         }
     }
 }

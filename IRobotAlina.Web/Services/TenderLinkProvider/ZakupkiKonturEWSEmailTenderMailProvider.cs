@@ -2,6 +2,7 @@
 using IRobotAlina.Data.Seed;
 using IRobotAlina.Web.Models;
 using IRobotAlina.Web.Services.Mails;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -106,34 +107,23 @@ namespace IRobotAlina.Web.Services.TenderLinkProvider
                 unprocessedEmail.IsProcessed = true;
 
                 applicationDbContext.Update(unprocessedEmail);
-
-                /*
-                Microsoft.Data.SqlClient.SqlParameter mailId = new Microsoft.Data.SqlClient.SqlParameter("@mailId", tenderMail.Id);
-                applicationDbContext.Database.ExecuteSqlRaw("p_CreateTotalTenderMailContent @mailId", mailId);
-                */
             }
 
             applicationDbContext.SaveChanges();
         }
 
-        public void MarkAsCompleted(TenderMailDto tenderMail)
-        {
-            var unprocessedEmails = applicationDbContext.TenderMails
-                .Where(x => x.IsProcessed == false)
-                .ToList();
+        public void MarkAsCompleted(TenderMailDto tenderMailDto)
+        {         
+            var tenderMail = applicationDbContext.TenderMails?.FirstOrDefault(x => x.Id == tenderMailDto.Id);
 
-            var unprocessedEmail = unprocessedEmails.FirstOrDefault(x => x.Id == tenderMail.Id);
-
-            if (unprocessedEmail == null)
+            if (tenderMail == null)
             {
                 return;
             }
 
-            unprocessedEmail.IsProcessed = true;
-
-            applicationDbContext.Update(unprocessedEmail);
-
-            applicationDbContext.SaveChanges();
+            tenderMail.IsProcessed = true;            
+            applicationDbContext.SaveChanges(); 
+            applicationDbContext.Update(tenderMail);            
         }
     }
 }

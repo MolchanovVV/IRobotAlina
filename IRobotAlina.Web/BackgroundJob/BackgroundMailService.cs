@@ -38,13 +38,13 @@ namespace IRobotAlina.Web.BackgroundJob
 
                 await processor.Execute();
                 
-                backgroundJobClient.Schedule(() => new BackgroundMailService(serviceProvider).ExecuteAsync(), TimeSpan.FromMinutes(3));
+                backgroundJobClient.Schedule(() => new BackgroundMailService(serviceProvider).ExecuteAsync(), TimeSpan.FromMinutes(5));
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, $"{jobId} finished execution with error, queueing next instance");
                 
-                backgroundJobClient.Schedule(() => new BackgroundMailService(serviceProvider).ExecuteAsync(), TimeSpan.FromMinutes(3));
+                backgroundJobClient.Schedule(() => new BackgroundMailService(serviceProvider).ExecuteAsync(), TimeSpan.FromMinutes(5));
                 throw;
             }
 

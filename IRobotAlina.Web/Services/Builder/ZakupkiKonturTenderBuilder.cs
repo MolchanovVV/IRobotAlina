@@ -25,7 +25,7 @@ namespace IRobotAlina.Web.Services.Builder
             if (tender != null)
             {
                 var files = dbContext.TenderFileAttachments
-                    .Where(x => x.TenderId == tender.Id && x.ArchiveName == null)
+                    .Where(x => x.TenderId == tender.Id && string.IsNullOrEmpty(x.ArchiveName)) // отбираются только архивы и файлы, которые не были в архивах. Т.е. именно тот набор файлов, который был в тендере изначально.
                     .Select(x => new LinkFileDto()
                     {
                         Name = x.FileName

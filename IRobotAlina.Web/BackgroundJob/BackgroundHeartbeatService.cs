@@ -38,13 +38,13 @@ namespace IRobotAlina.Web.BackgroundJob
 
                 await processor.SetKnockKnock();
 
-                backgroundJobClient.Schedule(() => new BackgroundHeartbeatService(serviceProvider).ExecuteAsync(), TimeSpan.FromMinutes(5));
+                backgroundJobClient.Schedule(() => new BackgroundHeartbeatService(serviceProvider).ExecuteAsync(), TimeSpan.FromMinutes(20));
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, $"{jobId} finished execution with error, queueing next instance");
 
-                backgroundJobClient.Schedule(() => new BackgroundHeartbeatService(serviceProvider).ExecuteAsync(), TimeSpan.FromMinutes(5));
+                backgroundJobClient.Schedule(() => new BackgroundHeartbeatService(serviceProvider).ExecuteAsync(), TimeSpan.FromMinutes(20));
                 throw;
             }            
         }

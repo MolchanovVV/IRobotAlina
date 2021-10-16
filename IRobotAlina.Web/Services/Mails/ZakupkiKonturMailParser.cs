@@ -12,12 +12,11 @@ namespace IRobotAlina.Web.Services.Mails
         {
             HtmlDocument doc = new HtmlDocument();
             doc.LoadHtml(html);
-
-            var nameNodes = doc.DocumentNode.SelectNodes("//span[contains(text(), \"07:00\")]");
-            var name = HttpUtility.HtmlDecode(string.Concat("Уведомления по закупкам ", nameNodes.Select(x => x.InnerText)?.FirstOrDefault().Replace("\r\n", " ") ?? string.Empty));
+            
+            var nameNode = doc.DocumentNode.SelectNodes($"//span[contains(text(), \":00\")]");
+            var name = HttpUtility.HtmlDecode(string.Concat("Уведомления по закупкам ", nameNode?.Select(x => x.InnerText)?.FirstOrDefault().Replace("\r\n", " ") ?? string.Empty));
 
             List<MailLink> links = new List<MailLink>();
-
             try
             {
                 var linkNodes = doc.DocumentNode.SelectNodes("//a[contains(@href, \"subscription\")] [not(contains(@href, \"Favorites\"))] [not(contains(@href, \"NewPurchases\"))]");

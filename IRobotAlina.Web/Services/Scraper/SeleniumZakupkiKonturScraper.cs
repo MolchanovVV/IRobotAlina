@@ -1,18 +1,14 @@
 ﻿using IRobotAlina.Web.Services.Configuration;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace IRobotAlina.Web.Services.Scraper
 {
@@ -42,10 +38,10 @@ namespace IRobotAlina.Web.Services.Scraper
         /// When authenticated flips isIntialized to true, so we can use same instance multiple times
         /// </summary>
         public void Initialize()
-        {            
+        {
             ChromeOptions options = new ChromeOptions();
             options.AddArgument("no-sandbox");
-                        
+
             webDriver = new ChromeDriver(ChromeDriverService.CreateDefaultService(), options)
             {
                 Url = baseUrl
@@ -78,7 +74,7 @@ namespace IRobotAlina.Web.Services.Scraper
         {
             if (!isInitialized)
                 Initialize();
-            
+
             if (webDriver.Url != tenderUrl)
                 webDriver.Url = tenderUrl;
 
@@ -98,29 +94,29 @@ namespace IRobotAlina.Web.Services.Scraper
                 tenderNumber = tenderNumber.Replace("№", "").Trim();
             }
 
-            var tenderTitleBy = By.XPath("//div[@class=\"blockTitle blockTitle__main\"]/h1");                                                       
+            var tenderTitleBy = By.XPath("//div[@class=\"blockTitle blockTitle__main\"]/h1");
             Wait(x => webDriver.FindElements(tenderTitleBy).Count > 0, 15);
             var tenderTitle = webDriver.FindElement(tenderTitleBy)?.Text;
 
-            var tenderDescription = new StringBuilder();
-
             CloseSurveyPopupIfOpen();
-                        
-            var purchaseInfoWraps = By.XPath("//div[contains(@class, \"purchaseInfoWrap\")]").FindElements(webDriver);            
+
+            var sbTenderDescription = new StringBuilder();
+            var purchaseInfoWraps = By.XPath("//div[contains(@class, \"purchaseInfoWrap\")]").FindElements(webDriver);
             for (var i = 0; i < purchaseInfoWraps.Count; i++)
             {
                 try
                 {
-                    tenderDescription.AppendLine(purchaseInfoWraps[i].Text);                    
+                    sbTenderDescription.AppendLine(purchaseInfoWraps[i].Text);
                 }
                 catch { }
             }
-                       
+
+            string tenderDescription = sbTenderDescription.Length != 0 ? sbTenderDescription.ToString() : null;
             return new TenderDto()
-            {                
+            {
                 Number = tenderNumber,
                 Name = tenderTitle,
-                Description = tenderDescription.ToString(),
+                Description = tenderDescription,
                 Documents = GetDocumentUrls(tenderUrl)
             };
         }
@@ -201,26 +197,20 @@ namespace IRobotAlina.Web.Services.Scraper
             }
         }
 
-        //public async Task<bool> DownloadFileTendersAdditionalPart(string url)        
         public void DownloadFileTendersAdditionalPart(string url)
         {
             if (string.IsNullOrWhiteSpace(url))
                 return;
-            
+
             if (!isInitialized)
                 Initialize();
 
-            url = url.Replace("&amp;", "&");            
-            
+            url = url.Replace("&amp;", "&");
+
             if (webDriver.Url != url)
                 webDriver.Url = url;
-            
-            //if (await GetStatusCode() != HttpStatusCode.OK)
-            //    return false;
-            
-            Thread.Sleep(2000);
 
-            //return true;
+            Thread.Sleep(2000);
         }
 
         public void Dispose()
