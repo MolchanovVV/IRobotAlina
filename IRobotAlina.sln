@@ -7,7 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRobotAlina.Web", "IRobotAl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRobotAlina.Data", "IRobotAlina.Data\IRobotAlina.Data.csproj", "{99FEA444-F339-4972-A578-6367EFBCBAA2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRobotAlinaFake_ConsoleAppNetCore", "IRobotAlinaFake_ConsoleAppNetCore\IRobotAlinaFake_ConsoleAppNetCore.csproj", "{754EB41D-6FDA-431C-BD5F-5B7D0678CEC7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRobotAlinaFake_ConsoleAppNetCore", "IRobotAlinaFake_ConsoleAppNetCore\IRobotAlinaFake_ConsoleAppNetCore.csproj", "{754EB41D-6FDA-431C-BD5F-5B7D0678CEC7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{93EB4B17-AF7D-4787-9992-6D798C480C0C}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

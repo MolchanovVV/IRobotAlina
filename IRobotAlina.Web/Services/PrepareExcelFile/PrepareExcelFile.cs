@@ -1,5 +1,8 @@
-﻿using IRobotAlina.Web.BackgroundJob;
-using NamedPipeWrapper;
+﻿using Hangfire;
+using Hangfire.Storage;
+using Hangfire.Storage.Monitoring;
+using IRobotAlina.Web.BackgroundJob;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace IRobotAlina.Web.Services.PrepareExcelFile
@@ -8,9 +11,28 @@ namespace IRobotAlina.Web.Services.PrepareExcelFile
     {
         public Task Prepare(int mailId, string fileName, byte[] content)
         {
-            string preparedFileName = Hangfire.BackgroundJob.Enqueue<OuterPrepareExcelFileService>(x => x.Execute(mailId, fileName, content));
+            string jobId = Hangfire.BackgroundJob.Enqueue<OuterPrepareExcelFileService>(x => x.Execute(mailId, fileName, content));
 
-            return Task.CompletedTask;
+            Task checkJobState = Task.Factory.StartNew(() =>
+            {
+                while (true)
+                {
+                    IMonitoringApi monitoringApi = JobStorage.Current.GetMonitoringApi();
+                    JobDetailsDto jobDetails = monitoringApi.JobDetails(jobId);
+
+                    string currentState = jobDetails.History[0].StateName;
+                    if (currentState != "Enqueued" && currentState != "Processing")
+                    {
+                        break;
+                    }
+
+                    Thread.Sleep(100); // adjust to a coarse enough value for your scenario
+                }
+
+                Thread.Sleep(1000);
+            });
+            
+            return checkJobState;            
         }
     }
 }

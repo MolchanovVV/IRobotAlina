@@ -3,9 +3,14 @@ using IRobotAlina.Web.Services.PrepareExcelFile;
 using Microsoft.EntityFrameworkCore;
 using NamedPipeWrapper;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using TenderDocumentsScraper.Data;
+using IRobotAlina.Data.Entities;
+using System.Globalization;
+using System.Linq;
+using Newtonsoft.Json;
 
 namespace IRobotAlina.Web.BackgroundJob
 {
@@ -28,31 +33,47 @@ namespace IRobotAlina.Web.BackgroundJob
         }
 
         [Queue("beta")]
-        public async Task Execute(int mailId, string fileName, byte[] content)
+        public async Task Execute(int mailId, string fileName, byte[] content)        
         {
+            var tenderMailFile = dbContext.TenderMailFiles.FirstOrDefault(x => x.TenderMailId == mailId && x.Type == Data.Entities.Enums.ETenderMailFileType.TenderAdditionalPart );
+            bool isNew = false;
+
+            if (tenderMailFile == null)            
+            {
+                isNew = true;
+                tenderMailFile = new TenderMailFile() { TenderMailId = mailId, Type = Data.Entities.Enums.ETenderMailFileType.TenderAdditionalPart };
+            }
+
+            tenderMailFile.Name = fileName;
+            tenderMailFile.Content = content;
+
             try
-            {
-                Exl_DataMessage dataMessage = await service.SendRequestToPrepareExcelFile(mailId, fileName, content);
-
-                if (dataMessage.type == DataMessageSettings.MessageType.Error)
-                    throw new Exception(dataMessage.errMsg);
-
-                //string preparedFileName = Path.Combine(Environment.Current​Directory, "Контур", "Рабочие", string.Concat(Path.GetFileNameWithoutExtension(fileName), "_Prepared", Path.GetExtension(fileName)));
-
-                //string preparedFileName = Path.Combine(@"C:\ForLinkedServer", string.Concat(Path.GetFileNameWithoutExtension(fileName), "_Prepared", Path.GetExtension(fileName)));
-                //File.WriteAllBytes(preparedFileName, dataMessage.content);
-
-                //dbContext.Database.ExecuteSqlRaw($"exec [dbo].[p_FillTmpTenderAddPart] @mailId = {mailId}, @fileName = '{preparedFileName}'");
-
-                //dbContext.Database.ExecuteSqlRaw($"exec [dbo].[p_FillTmpTenderAddPart] @mailId = {mailId}, @fileName = 'C:\\ForLinkedServer\\Контур.Закупки_13.06.2021_Prepared.xlsx'");
-                
-
-                //dbContext.Database.ExecuteSqlRaw($"exec [dbo].[p_CheckSPExec] @mailId = {mailId}, @value = 1");
+            {                
+                Exl_DataMessage dataMessage = await service.SendRequestToPrepareExcelFile(mailId, fileName, content);                
+                tenderMailFile.ParsedData = dataMessage.serviceResult;
+                tenderMailFile.DateParsing = DateTime.Now;
+                tenderMailFile.Status = Data.Entities.Enums.ETenderMailFileStatus.Successful;
             }
-            catch(Exception)
+            catch (Exception ex)
             {
-                throw;
+                tenderMailFile.ParsedData = ex.Message;
+                tenderMailFile.Status = Data.Entities.Enums.ETenderMailFileStatus.Error;
             }
-        }
+            finally
+            {
+                if (isNew)
+                {
+                    dbContext.Add(tenderMailFile);
+                }
+                else
+                {
+                    dbContext.Update(tenderMailFile);
+                }
+
+                //dbContext.Entry(tenderMailFile).Property(x => x.Content).IsModified = false;
+                dbContext.SaveChanges();
+                dbContext.DetachAllEntities();
+            }            
+        }        
     }
 }

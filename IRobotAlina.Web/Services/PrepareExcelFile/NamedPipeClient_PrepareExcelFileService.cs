@@ -27,8 +27,11 @@ namespace IRobotAlina.Web.Services.PrepareExcelFile
         {
             this.mailId = mailId;
             this.fileName = fileName;
+            /*
             this.content = new byte[content.Length];
             content.CopyTo(this.content, 0);
+            */
+            this.content = content;
 
             try
             {
@@ -38,7 +41,8 @@ namespace IRobotAlina.Web.Services.PrepareExcelFile
                 namedPipeClient.Start();
                 namedPipeClient.WaitForDisconnection(TimeSpan.FromMinutes(2));
 
-                if (dataMessage is null || (dataMessage.type != DataMessageSettings.MessageType.Exl_Response && dataMessage.type != DataMessageSettings.MessageType.Error))
+                //if (dataMessage is null || (dataMessage.type != DataMessageSettings.MessageType.Exl_Response && dataMessage.type != DataMessageSettings.MessageType.Error))
+                if (dataMessage is null)
                 {
                     dataMessage = new Exl_DataMessage()
                     {
@@ -51,8 +55,9 @@ namespace IRobotAlina.Web.Services.PrepareExcelFile
             }
             finally
             {
-                this.content = null;
+                //this.content = null;
                 namedPipeClient?.Stop();
+                namedPipeClient = null;
             }
         }
 
@@ -82,11 +87,12 @@ namespace IRobotAlina.Web.Services.PrepareExcelFile
                         case DataMessageSettings.MessageType.Exl_Response:
                         case DataMessageSettings.MessageType.Error:
                             dataMessage.type = exl_message.type;
-                            dataMessage.content = exl_message.content;
+                            dataMessage.content = null;
+                            dataMessage.serviceResult = exl_message.serviceResult;
                             dataMessage.errMsg = exl_message.errMsg;
 
-                            namedPipeClient.Stop();
-                            namedPipeClient = null;
+                            if (connection.IsConnected)
+                                connection.Close();
                             break;
 
                         default:
@@ -102,7 +108,7 @@ namespace IRobotAlina.Web.Services.PrepareExcelFile
             }
             catch (Exception ex)
             {
-                if (dataMessage != null)
+                if (dataMessage == null)
                     dataMessage = new Exl_DataMessage();
 
                 dataMessage.type = DataMessageSettings.MessageType.Error;
@@ -110,17 +116,17 @@ namespace IRobotAlina.Web.Services.PrepareExcelFile
                 dataMessage.content = null;
 
                 logger.LogError(ex, $"PrepareExcelFile.SendRequestToPrepareExcelFile, mailId [{mailId}], file [\"{fileName}\"].");
-                ex.Data.Add("methodName", "NamedPipeClient_OnServerMessage");
+                //ex.Data.Add("methodName", "NamedPipeClient_OnServerMessage");
                 OnError(ex);
             }
         }
 
         private void OnError(Exception ex)
         {
-            if (!ex.Data.Contains("methodName"))
-                logger.LogError(ex, $"NamedPipeClient_OnError");
+            //if (!ex.Data.Contains("methodName"))
+            //    logger.LogError(ex, $"NamedPipeClient_OnError");
 
-            this.content = null;
+            //this.content = null;
             namedPipeClient?.Stop();
             namedPipeClient = null;
         }

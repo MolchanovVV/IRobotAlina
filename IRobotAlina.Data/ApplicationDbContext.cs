@@ -11,7 +11,9 @@ namespace TenderDocumentsScraper.Data
         public DbSet<Tender> Tenders { get; set; }
         public DbSet<TenderFileAttachment> TenderFileAttachments { get; set; }        
         public DbSet<ConfigurationItem> ConfigurationItems { get; set; }
+        public DbSet<TenderMailFile> TenderMailFiles { get; set; }
         
+
         public ApplicationDbContext() : base()
         { }
 
@@ -22,7 +24,7 @@ namespace TenderDocumentsScraper.Data
         {
             optionsBuilder.UseSqlServer(
                 @"Server=SRVP-BOTMKM;Database=tenders;User Id=sa;Password=482005Lol!",
-                b => b.MigrationsAssembly("IRobotAlina.Web"));
+                b => b.MigrationsAssembly("IRobotAlina.Web"));            
         }           
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -30,6 +32,10 @@ namespace TenderDocumentsScraper.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
+
+            modelBuilder.Entity<Tender>().OwnsOne(p => p.Purchase);
+            modelBuilder.Entity<Tender>().OwnsOne(p => p.Customer);
+            modelBuilder.Entity<Tender>().OwnsOne(p => p.Result);            
         }
 
         public void DetachAllEntities()

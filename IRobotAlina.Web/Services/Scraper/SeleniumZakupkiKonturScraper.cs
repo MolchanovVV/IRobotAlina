@@ -1,18 +1,14 @@
 ﻿using IRobotAlina.Web.Services.Configuration;
-using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace IRobotAlina.Web.Services.Scraper
 {
@@ -43,9 +39,10 @@ namespace IRobotAlina.Web.Services.Scraper
         /// </summary>
         public void Initialize()
         {
-            var credentials = credentialsProvider.GetCredentials();
+            ChromeOptions options = new ChromeOptions();
+            options.AddArgument("no-sandbox");
 
-            webDriver = new ChromeDriver
+            webDriver = new ChromeDriver(ChromeDriverService.CreateDefaultService(), options)
             {
                 Url = baseUrl
             };
@@ -55,6 +52,7 @@ namespace IRobotAlina.Web.Services.Scraper
             var passwordBy = By.XPath("//input[@type=\"password\"]");
             Wait(x => x.FindElements(emailBy).Count > 0);
 
+            var credentials = credentialsProvider.GetCredentials();
             webDriver.FindElement(emailBy).SendKeys(credentials.Email);
             webDriver.FindElement(passwordBy).SendKeys(credentials.Password);
 
@@ -76,37 +74,50 @@ namespace IRobotAlina.Web.Services.Scraper
         {
             if (!isInitialized)
                 Initialize();
-            
+
             if (webDriver.Url != tenderUrl)
                 webDriver.Url = tenderUrl;
 
             if (await GetStatusCode() != HttpStatusCode.OK)
                 return null;
 
-            var tenderTitleBy = By.XPath("//div[@class=\"blockTitle blockTitle__main\"]/h1");                                                       
+            var tenderNumberBy = By.XPath("//p[contains(@class, \"tender_title\")]");
+            Wait(x => webDriver.FindElements(tenderNumberBy).Count > 0, 15);
+            var tmpTenderNumber = webDriver.FindElement(tenderNumberBy)?.Text;
 
+            string tenderNumber = null;
+            int index = tmpTenderNumber.LastIndexOf("№");
+            if (index >= 0)
+            {
+                tenderNumber = tmpTenderNumber.Substring(index, tmpTenderNumber.Length - index);
+
+                tenderNumber = tenderNumber.Replace("№", "").Trim();
+            }
+
+            var tenderTitleBy = By.XPath("//div[@class=\"blockTitle blockTitle__main\"]/h1");
             Wait(x => webDriver.FindElements(tenderTitleBy).Count > 0, 15);
-
             var tenderTitle = webDriver.FindElement(tenderTitleBy)?.Text;
-            var tenderDescription = new StringBuilder();
 
             CloseSurveyPopupIfOpen();
-                        
-            var purchaseInfoWraps = By.XPath("//div[contains(@class, \"purchaseInfoWrap\")]").FindElements(webDriver);            
+
+            var sbTenderDescription = new StringBuilder();
+            var purchaseInfoWraps = By.XPath("//div[contains(@class, \"purchaseInfoWrap\")]").FindElements(webDriver);
             for (var i = 0; i < purchaseInfoWraps.Count; i++)
             {
                 try
                 {
-                    tenderDescription.AppendLine(purchaseInfoWraps[i].Text);                    
+                    sbTenderDescription.AppendLine(purchaseInfoWraps[i].Text);
                 }
                 catch { }
             }
-                       
+
+            string tenderDescription = sbTenderDescription.Length != 0 ? sbTenderDescription.ToString() : null;
             return new TenderDto()
             {
-                Documents = GetDocumentUrls(tenderUrl),
+                Number = tenderNumber,
                 Name = tenderTitle,
-                Description = tenderDescription.ToString()
+                Description = tenderDescription,
+                Documents = GetDocumentUrls(tenderUrl)
             };
         }
 
@@ -185,12 +196,12 @@ namespace IRobotAlina.Web.Services.Scraper
                 yield return new System.Net.Cookie(cookie.Name, cookie.Value, cookie.Path, cookie.Domain);
             }
         }
-        
-        public async Task<bool> DownloadFileTendersAdditionalPart(string url)
+
+        public void DownloadFileTendersAdditionalPart(string url)
         {
             if (string.IsNullOrWhiteSpace(url))
-                return false;
-            
+                return;
+
             if (!isInitialized)
                 Initialize();
 
@@ -199,15 +210,7 @@ namespace IRobotAlina.Web.Services.Scraper
             if (webDriver.Url != url)
                 webDriver.Url = url;
 
-            if (await GetStatusCode() != HttpStatusCode.OK)
-                return false;
-
-            var xpDownloadIsComplite = By.XPath("//div[@id=\"message\"]//a[contains(@class, \"js-excel\")]");            
-            Wait(x => x.FindElements(xpDownloadIsComplite).Count > 0);
-
-            Thread.Sleep(1500);
-
-            return true;
+            Thread.Sleep(TimeSpan.FromSeconds(10));
         }
 
         public void Dispose()

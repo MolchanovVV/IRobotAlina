@@ -1,11 +1,13 @@
 ﻿using IRobotAlina.Data.Entities;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TenderDocumentsScraper.Data;
 
 namespace IRobotAlina.Web.Services.Builder
 {
-    public class ZakupkiKonturTenderBuilder : ITenderBuilder, IZakupkiKonturTenderBuilder
+    public class ZakupkiKonturTenderBuilder : IZakupkiKonturTenderBuilder
     {
         private readonly ApplicationDbContext dbContext;
 
@@ -14,16 +16,16 @@ namespace IRobotAlina.Web.Services.Builder
             this.dbContext = dbContext;
         }
 
-        public (Tender tender, List<LinkFileDto> rootFiles) GetOrCreate(Tender info)
+        public (Tender tender, List<LinkFileDto> rootFiles) GetOrCreate(Tender info, Tender addPart)
         {
-            string externalId = ExtractExternalId(info.Url);
+            string externalId = ExtractExternalId(info.Url); 
 
-            var tender = dbContext.Tenders.FirstOrDefault(x => x.ExternalId == externalId && x.TenderMailId == info.TenderMailId);
+            var tender = dbContext.Tenders.FirstOrDefault(x => x.TenderMailId == info.TenderMailId && x.ExternalId == externalId);
 
             if (tender != null)
             {
                 var files = dbContext.TenderFileAttachments
-                    .Where(x => x.TenderId == tender.Id && x.ArchiveName == null)
+                    .Where(x => x.TenderId == tender.Id && string.IsNullOrEmpty(x.ArchiveName)) // отбираются только архивы и файлы, которые не были в архивах. Т.е. именно тот набор файлов, который был в тендере изначально.
                     .Select(x => new LinkFileDto()
                     {
                         Name = x.FileName
@@ -33,19 +35,39 @@ namespace IRobotAlina.Web.Services.Builder
                 return (tender, files);
             }
 
-            tender = new Tender()
+            if (addPart != null && (info.Number?.ToLowerInvariant() ?? "") == addPart.Number.ToLowerInvariant())
             {
-                ExternalId = externalId,
-                Url = info.Url,
-                Name = info.Name,
-                TenderMailId = info.TenderMailId,
-                Order = info.Order,
-                Description = info.Description
-            };
+                tender = addPart;
+            }
+            else
+            {
+                tender = new Tender();
+            }
 
-            dbContext.Add(tender);
-            dbContext.SaveChanges();
-            
+            tender.Id = 0;
+            tender.TenderMailId = info.TenderMailId;            
+            tender.ExternalId = externalId;
+            tender.Number = info.Number;
+            tender.Name = info.Name;
+            tender.Url = info.Url;
+            tender.Order = info.Order;
+            tender.Description = info.Description;
+            tender.Status = ETenderStatus.New;
+
+            try
+            {
+                dbContext.Add(tender);
+                dbContext.SaveChanges();
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new Exception($"DbUpdateException: {ex.Message}, inner exceptionMessage: {ex.InnerException} (TenderMailId: [{tender.TenderMailId}], Name: [{tender.Name}], Order: [{tender.Order}])");
+            }
+            catch(Exception ex)
+            {
+                throw new Exception($"Exception: {ex.Message}, inner exceptionMessage: {ex.InnerException} (TenderMailId: [{tender.TenderMailId}], Name: [{tender.Name}], Order: [{tender.Order}])");
+            }
+                        
             return (tender, new List<LinkFileDto>());
         }
 

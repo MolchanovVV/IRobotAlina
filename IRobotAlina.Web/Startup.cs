@@ -5,11 +5,14 @@ using IRobotAlina.Web.Services.Builder;
 using IRobotAlina.Web.Services.Configuration;
 using IRobotAlina.Web.Services.Download;
 using IRobotAlina.Web.Services.Files;
+using IRobotAlina.Web.Services.HeartbeatProvider;
 using IRobotAlina.Web.Services.Mails;
 using IRobotAlina.Web.Services.PrepareExcelFile;
 using IRobotAlina.Web.Services.Scraper;
 using IRobotAlina.Web.Services.Storage;
 using IRobotAlina.Web.Services.TenderLinkProvider;
+using IRobotAlina.Web.Services.TenderMailContentService;
+using IRobotAlina.Web.Services.TenderMailFiles;
 using IRobotAlina.Web.Services.TenderPlatformProcessor;
 using IRobotAlina.Web.Services.TextExtractor;
 using Microsoft.AspNetCore.Builder;
@@ -65,9 +68,9 @@ namespace TenderDocumentsScraper
             services.AddScoped<IXlsDocumentTextExtractor, OuterTextExtractor>();
             services.AddScoped<IXlsxDocumentTextExtractor, OuterTextExtractor>();
             services.AddScoped<ITxtDocumentTextExtractor, InnerTextExtractor>();
-            services.AddScoped<NamedPipeClient_TextExtractionService>();           
+            services.AddScoped<NamedPipeClient_TextExtractionService>();
 
-            services.AddScoped<ITemporaryStoragePathProvider, TemporaryStoragePathProvider>();            
+            services.AddScoped<ITemporaryStoragePathProvider, TemporaryStoragePathProvider>();
             services.AddScoped<IZakupkiKonturScraper, SeleniumZakupkiKonturScraper>();
             services.AddScoped<IZakupkiKonturTenderBuilder, ZakupkiKonturTenderBuilder>();
             services.AddScoped<ISaveTenderFileAttachment, SaveTenderFileToDatabaseService>();
@@ -76,16 +79,20 @@ namespace TenderDocumentsScraper
             services.AddScoped<IZakupkiKonturMailParser, ZakupkiKonturMailParser>();
 
             //services.AddScoped<IZakupkiKonturTenderLinkProvider, ZakupkiKonturDummyEmailTenderLinkProvider>();
-            services.AddScoped<IZakupkiKonturTenderMailProvider, ZakupkiKonturEWSEmailTenderMailProvider>();           
+            services.AddScoped<IZakupkiKonturTenderMailProvider, ZakupkiKonturEWSEmailTenderMailProvider>();
 
             services.AddScoped<EWSMailProvider>();
             services.AddScoped<IMailFilteringConfigurationProvider, DBMailFilteringConfigurationProvider>();
             services.AddScoped<IEWSConfigurationProvider, DBEWSConfigurationProvider>();
-            services.AddScoped<IZakupkiKonturCredentialsProvider, DBZakupkiKonturCredentialsProvider>();            
-            services.AddScoped<ValidateConfigurationSettings>();            
+            services.AddScoped<IZakupkiKonturCredentialsProvider, DBZakupkiKonturCredentialsProvider>();
+            services.AddScoped<ValidateConfigurationSettings>();
             services.AddScoped<IPrepareExcelFile, PrepareExcelFile>();
             services.AddScoped<NamedPipeClient_PrepareExcelFileService>();
             services.AddScoped<OuterTextExtractionService>();
+            services.AddScoped<ITenderMailFileProvider, TenderMailFileProvider>();
+            services.AddScoped<IParseTenderAdditionalPartExcelData, ParseTenderAdditionalPartExcelData>();
+            services.AddScoped<IHeartbeatProvider, HeartbeatProvider>();
+            services.AddScoped<ITenderMailContentService, TenderMailContentService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -127,11 +134,17 @@ namespace TenderDocumentsScraper
             var api = JobStorage.Current.GetMonitoringApi();
             var scheduledJobs = api.ScheduledJobs(0, 10);
             var processingJobs = api.ProcessingJobs(0, 10);
-            
+
             if (scheduledJobs.Any(x => x.Value.Job.Type == typeof(BackgroundMailService)) == false
                 && processingJobs.Any(x => x.Value.Job.Type == typeof(BackgroundMailService)) == false)
             {
                 backgroundJobClient.Schedule(() => new BackgroundMailService(serviceProvider).ExecuteAsync(), TimeSpan.FromSeconds(10));
+            }
+
+            if (scheduledJobs.Any(x => x.Value.Job.Type == typeof(BackgroundHeartbeatService)) == false
+                && processingJobs.Any(x => x.Value.Job.Type == typeof(BackgroundHeartbeatService)) == false)
+            {
+                backgroundJobClient.Schedule(() => new BackgroundHeartbeatService(serviceProvider).ExecuteAsync(), TimeSpan.FromSeconds(10));
             }
         }
 
