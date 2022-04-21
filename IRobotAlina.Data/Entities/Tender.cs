@@ -81,7 +81,7 @@ namespace IRobotAlina.Data.Entities
         [Column(TypeName = "varchar(128)")]
         public string TypeBidding { get; set; }         // Тип торгов
 
-        [Column(TypeName = "varchar(128)")]
+        [Column(TypeName = "varchar(256)")]
         public string SelectionMethod { get; set; }     // Способ отбора
 
         [Column(TypeName = "nvarchar(128)")]

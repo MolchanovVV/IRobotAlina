@@ -86,7 +86,7 @@ namespace IRobotAlina.Web.Services.Scraper
             var tmpTenderNumber = webDriver.FindElement(tenderNumberBy)?.Text;
 
             string tenderNumber = null;
-            int index = tmpTenderNumber.IndexOf("№");
+            int index = tmpTenderNumber.LastIndexOf("№");
             if (index >= 0)
             {
                 tenderNumber = tmpTenderNumber.Substring(index, tmpTenderNumber.Length - index);
@@ -210,7 +210,7 @@ namespace IRobotAlina.Web.Services.Scraper
             if (webDriver.Url != url)
                 webDriver.Url = url;
 
-            Thread.Sleep(2000);
+            Thread.Sleep(TimeSpan.FromSeconds(10));
         }
 
         public void Dispose()

@@ -80,7 +80,7 @@ namespace IRobotAlina.Web.Services.TenderPlatformProcessor
                         .OrderBy(p => File.GetLastWriteTime(p))?.LastOrDefault();
 
                     if (!string.IsNullOrEmpty(sourceFileName))
-                    {                        
+                    {
                         DateTime lastWriteTime = Directory.GetLastWriteTime(sourceFileName);
                         string destFileName = $"{Path.GetFileNameWithoutExtension(sourceFileName)} ({lastWriteTime.ToString("dd.MM.yyyy HH-mm-ss")}){Path.GetExtension(sourceFileName)}";
 
@@ -94,7 +94,7 @@ namespace IRobotAlina.Web.Services.TenderPlatformProcessor
                         await prepareExcelFile.Prepare(tenderMail.Id.Value, destFileName, File.ReadAllBytes(Path.Combine(fileMainStorageConture, destFileName)));
                     }
                 }
-                
+
                 string parsedData = tenderMailFileProvider.GetTenderMailFiles(tenderMail.Id.Value)
                     ?.Where(p => p.Type == Data.Entities.Enums.ETenderMailFileType.TenderAdditionalPart && p.Status == Data.Entities.Enums.ETenderMailFileStatus.Successful)
                     ?.Select(s => s.ParsedData)
@@ -111,7 +111,7 @@ namespace IRobotAlina.Web.Services.TenderPlatformProcessor
                     if (tenderInfo == null)
                         continue;
 
-                    var tmpTender = new Tender()
+                    var tmpTender = new Tender() 
                     {
                         TenderMailId = tenderMail.Id.Value,
                         Number = tenderInfo.Number,
@@ -135,16 +135,15 @@ namespace IRobotAlina.Web.Services.TenderPlatformProcessor
                         if (fileContent != null)
                         {
                             foreach (var file in fileService.ExtractFiles(attachmentLink.FileName, fileContent))
-                            {
-                                var attachment = new TenderFileAttachment()
-                                {
-                                    Content = file.FileContent,
-                                    TenderId = tender.tender.Id,
-                                    FileName = file.FileName,
-                                    FullPath = file.FilePath,
-                                    ArchiveName = file.ArchiveName,
-                                    IsArchive = FileUtils.IsFileArchive(file.FileName)
-                                };
+                            {                                
+                                var attachment = new TenderFileAttachment(
+                                    tenderId: tender.tender.Id,
+                                    fileName: file.FileName,
+                                    fullPath: file.FilePath,
+                                    archiveName: file.ArchiveName,
+                                    content: file.FileContent,
+                                    isArchive: FileUtils.IsFileArchive(file.FileName)
+                                );
 
                                 await saveTenderFile.Save(attachment);
 

@@ -24,7 +24,7 @@ namespace IRobotAlinaFake_ConsoleAppNetCore
             string folderImage = Path.Combine(folder, "_Image");
             string folderLastErrors = Path.Combine(folder, "_LastErrors");
             string folderOneFile = Path.Combine(folder, "_OneFile");
-            string oneFileName = Path.Combine(folderOneFile, "ТУ 3500-014-12380249-2017 Провода и шнуры смоленск.pdf");
+            string oneFileName = Path.Combine(folderOneFile, "image_only.pdf");
             string excelFile = @"C:\Test\_xls\Контур.Закупки_18.09.2021.xlsx";
             string folderCableJournal = Path.Combine(folder, "_CableJournal");
 

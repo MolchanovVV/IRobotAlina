@@ -14,29 +14,29 @@
 	  <None Remove="chromedriver.exe" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Content Include="chromedriver.exe">
+	  <EmbeddedResource Include="chromedriver.exe">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </Content>
+	  </EmbeddedResource>
 	</ItemGroup>
 		
 	<ItemGroup>
-		<PackageReference Include="EAGetMail" Version="5.2.2.2" />
-		<PackageReference Include="Hangfire" Version="1.7.25" />
-		<PackageReference Include="HtmlAgilityPack" Version="1.11.37" />
+		<PackageReference Include="EAGetMail" Version="5.2.2.3" />
+		<PackageReference Include="Hangfire" Version="1.7.28" />
+		<PackageReference Include="HtmlAgilityPack" Version="1.11.42" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.13" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.10" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.10">
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.11" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.11">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.10" />
-		<PackageReference Include="Microsoft.Graph" Version="4.6.0" />
-		<PackageReference Include="Microsoft.Graph.Core" Version="2.0.5" />
-		<PackageReference Include="Microsoft.Identity.Client" Version="4.36.2" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.11" />
+		<PackageReference Include="Microsoft.Graph" Version="4.17.0" />
+		<PackageReference Include="Microsoft.Graph.Core" Version="2.0.8" />
+		<PackageReference Include="Microsoft.Identity.Client" Version="4.43.1" />
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.4" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-		<PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
-		<PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="94.0.4606.6100" />
+		<PackageReference Include="Selenium.WebDriver" Version="4.1.0" />
+		<PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="100.0.4896.6000" />
 	</ItemGroup>
 
 

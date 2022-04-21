@@ -39,9 +39,10 @@ namespace IRobotAlina.Web.BackgroundJob
             if (tenderAttachment == null)
                 return;
 
+            TE_DataMessage result;
             try
             {                
-                TE_DataMessage result = await textExtractionService.SendRequestToTextExtract(tenderAttachment);
+                result = await textExtractionService.SendRequestToTextExtract(tenderAttachment);
 
                 tenderAttachment.ExtractedText = result.serviceResult;
                 tenderAttachment.ExceptionMessage = result.errMsg;
@@ -55,7 +56,8 @@ namespace IRobotAlina.Web.BackgroundJob
             }
             finally
             {
-                await saveTenderFileToDatabaseService.Update(tenderAttachment);                
+                await saveTenderFileToDatabaseService.Update(tenderAttachment);
+                result = null;
             }            
         }
     }

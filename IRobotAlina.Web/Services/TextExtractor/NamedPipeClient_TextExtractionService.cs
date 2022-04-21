@@ -27,11 +27,7 @@ namespace IRobotAlina.Web.Services.TextExtractor
         public async Task<TE_DataMessage> SendRequestToTextExtract(IAttachment attachment)
         {            
             attachmentTenderId = attachment.TenderId;
-            attachmentFileName = attachment.FileName;
-            /*
-            attachmentContent = new byte[attachment.Content.Length];
-            attachment.Content.CopyTo(attachmentContent, 0);
-            */
+            attachmentFileName = attachment.FileName;            
             attachmentContent = attachment.Content;
 
             try
@@ -41,22 +37,28 @@ namespace IRobotAlina.Web.Services.TextExtractor
                 namedPipeClient.Error += OnError;
                 namedPipeClient.Start();
                 namedPipeClient.WaitForDisconnection(TimeSpan.FromMinutes(20));
-
-                //if (dataMessage is null || (dataMessage.type != DataMessageSettings.MessageType.TE_Response && dataMessage.type != DataMessageSettings.MessageType.Error))
-               if (dataMessage is null)
-                {
-                    dataMessage = new TE_DataMessage
-                    {
-                        type = DataMessageSettings.MessageType.Error,                        
-                        errMsg = "Превышено время ожидания ответа от сервера."
-                    };
-                }
                 
-                return await Task.FromResult(dataMessage);
+               if (dataMessage is null)
+               {
+                   dataMessage = new TE_DataMessage
+                   {
+                       type = DataMessageSettings.MessageType.Error,                        
+                       errMsg = "Превышено время ожидания ответа от сервера."
+                   };
+               }
+                
+               return await Task.FromResult(dataMessage);
             }            
             finally
-            {
-                //attachmentContent = null;
+            {                
+                dataMessage = null;
+
+                if (namedPipeClient != null)
+                {
+                    namedPipeClient.Error -= OnError;
+                    namedPipeClient.ServerMessage -= OnServerMessage;
+                }
+                
                 namedPipeClient?.Stop();
                 namedPipeClient = null;
             }
@@ -79,9 +81,12 @@ namespace IRobotAlina.Web.Services.TextExtractor
                     connection.PushMessage(dataMessage);
                 }
                 else // а здесь мы уже работаем обязательно как с TE_DataMessage
-                {
+                {                    
                     if (!(message is TE_DataMessage te_message))
                         throw new Exception($"Некорректный класс сообщения, [{message.GetType().Name}].");
+
+                    if (dataMessage == null)
+                        dataMessage = new TE_DataMessage();
 
                     switch (te_message.type)
                     {
@@ -97,9 +102,7 @@ namespace IRobotAlina.Web.Services.TextExtractor
                             dataMessage.content = null;
                             dataMessage.serviceResult = te_message.serviceResult;
                             dataMessage.errMsg = te_message.errMsg;
-
-                            //namedPipeClient.Stop();
-                            //namedPipeClient = null;
+                                                        
                             if (connection.IsConnected)
                                 connection.Close();
                             break;
@@ -132,12 +135,13 @@ namespace IRobotAlina.Web.Services.TextExtractor
         }
 
         private void OnError(Exception ex)
-        {
-
-            //if (!ex.Data.Contains("methodName"))
-            //    logger.LogError(ex, $"NamedPipeClient_OnError");
-
-            //attachmentContent = null;
+        {            
+            if (namedPipeClient != null)
+            {
+                namedPipeClient.Error -= OnError;
+                namedPipeClient.ServerMessage -= OnServerMessage;
+            }
+            
             namedPipeClient?.Stop();
             namedPipeClient = null;
         }

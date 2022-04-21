@@ -14,8 +14,7 @@ namespace IRobotAlina.Web.Services.Files
         {
             var tempPath = Path.GetTempPath();
             foreach (var directory in Directory.GetDirectories(tempPath)
-                .Select(x => new DirectoryInfo(x))
-                .Where(x => x.Name.StartsWith("IRobotAlina")))
+                .Select(x => new DirectoryInfo(x)).Where(x => x.Name.StartsWith("IRobotAlina")))
             {
                 try
                 {
@@ -29,7 +28,7 @@ namespace IRobotAlina.Web.Services.Files
         {
             if (FileUtils.IsFileArchive(fileName))
             {
-                foreach (var file in ExtractArchiveFiles(bytes)) 
+                foreach (var file in ExtractArchiveFiles(fileName, bytes)) 
                 {
                     file.ArchiveName = fileName;
 
@@ -44,9 +43,9 @@ namespace IRobotAlina.Web.Services.Files
             };
         }
 
-        private IEnumerable<FileItem> ExtractArchiveFiles(byte[] bytes)
+        private IEnumerable<FileItem> ExtractArchiveFiles(string fileName, byte[] bytes)
         {
-            string archivePathFile = null, destination;
+            string archivePathFile = null, archivatorPath = null, arguments = null, destination;
 
             try
             {
@@ -57,18 +56,29 @@ namespace IRobotAlina.Web.Services.Files
                 Directory.CreateDirectory(destination);
 
                 File.WriteAllBytes(archivePathFile, bytes);
-
-                string archivatorPath = "./ExternalDLLs/WinRAR.exe";
+                
                 try
                 {
+                    if (Path.GetExtension(fileName).ToLowerInvariant() == ".7z")
+                    {
+                        archivatorPath = "./ExternalDLLs/7za.exe";
+                        arguments = string.Format("x \"{0}\" -y -o\"{1}\"", archivePathFile, destination);
+                    }
+                    else
+                    {
+                        archivatorPath = "./ExternalDLLs/WinRAR.exe";
+                        arguments = string.Format("x -y -ibck \"{0}\" \"{1}\"", archivePathFile, destination);
+                    };
+
                     ProcessStartInfo pro = new ProcessStartInfo
                     {
                         WindowStyle = ProcessWindowStyle.Hidden,
+                        //WindowStyle = ProcessWindowStyle.Normal,
                         FileName = archivatorPath,
-                        Arguments = string.Format("x -r -y -ibck \"{0}\" \"{1}\"", archivePathFile, destination)
+                        Arguments = arguments
                     };
 
-                    Process archProc = Process.Start(pro);
+                    Process archProc = Process.Start(pro);                    
                     archProc.WaitForExit();
                 }
                 catch (Exception) { }
@@ -82,13 +92,17 @@ namespace IRobotAlina.Web.Services.Files
                 }
                 catch { }
             }
-            
-            foreach (var unzippedFile in Directory.GetFiles(destination, "*.*", SearchOption.AllDirectories))
+
+            //var exts = new[] { ".rar", ".zip", ".7z" };
+            foreach (var unzippedFile in Directory.GetFiles(destination, "*.*", SearchOption.AllDirectories)
+                                                  //.Where(file => !exts.Any(x => file.EndsWith(x, StringComparison.OrdinalIgnoreCase)))
+                                                  )
             {
+                
                 using var fileStream = File.OpenRead(unzippedFile);
                 using var ms = new MemoryStream();
                 fileStream.CopyTo(ms);
-
+               
                 var relativePath = unzippedFile.Replace(destination, "", StringComparison.OrdinalIgnoreCase).TrimStart('\\');
 
                 yield return new FileItem()
@@ -96,7 +110,7 @@ namespace IRobotAlina.Web.Services.Files
                     FilePath = relativePath,
                     FileName = Path.GetFileName(relativePath),
                     FileContent = ms.ToArray()
-                };
+                };                                
             }
         }
     }
