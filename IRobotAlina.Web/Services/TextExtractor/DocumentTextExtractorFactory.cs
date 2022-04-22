@@ -29,11 +29,10 @@ namespace IRobotAlina.Web.Services.TextExtractor
             this.xlsxDocumentTextExtractor = xlsxDocumentTextExtractor;
             this.imageDocumentTextExtractor = imageDocumentTextExtractor;
         }
-
+        
         public IDocumentTextExtractor GetInstance(string fileName)
-        {
+        {          
             var extension = Path.GetExtension(fileName).ToLowerInvariant();
-
             return extension switch
             {
                 ".pdf"  => pdfDocumentTextExtractor,
@@ -43,9 +42,9 @@ namespace IRobotAlina.Web.Services.TextExtractor
                 ".xls"  => xlsDocumentTextExtractor,
                 ".xlsx" => xlsxDocumentTextExtractor,                
                 ".png"  => imageDocumentTextExtractor,
-                ".jpg"  => imageDocumentTextExtractor,
-                ".bmp"  => imageDocumentTextExtractor,
+                ".jpg"  => imageDocumentTextExtractor,                
                 ".jpeg" => imageDocumentTextExtractor,
+                ".bmp"  => imageDocumentTextExtractor,
                 _ => null
             };
         }        

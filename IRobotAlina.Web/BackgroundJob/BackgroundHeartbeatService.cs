@@ -19,7 +19,7 @@ namespace IRobotAlina.Web.BackgroundJob
             this.serviceProvider = serviceProvider;            
         }
        
-        [Queue("alpha")]
+        [Queue("main")]
         public async Task ExecuteAsync()
         {
             using var scope = serviceProvider.CreateScope();

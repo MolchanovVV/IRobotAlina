@@ -1,9 +1,8 @@
-﻿using NamedPipeWrapper;
-using IRobotAlina.Data.Entities;
+﻿using IRobotAlina.Data.Entities;
 using System.Threading.Tasks;
 
 namespace IRobotAlina.Web.Services.TextExtractor
-{        
+{
     public interface IDocumentTextExtractor
     {
         public Task Extract(IAttachment attachment);

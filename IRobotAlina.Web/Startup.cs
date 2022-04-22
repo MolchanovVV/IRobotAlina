@@ -50,17 +50,32 @@ namespace TenderDocumentsScraper
             );
 
             services.AddHangfire(x => x.UseSqlServerStorage(Configuration.GetConnectionString("DefaultConnection")));
+           
             services.AddHangfireServer(options =>
             {
+                options.ServerName = $"{Environment.MachineName}:main";
                 options.WorkerCount = Environment.ProcessorCount * 5;
-                options.Queues = new[] { "alpha", "beta", "default" };
+                options.Queues = new[] { "main" };
+            });
+
+            services.AddHangfireServer(options =>
+            {
+                options.ServerName = $"{Environment.MachineName}:pdf";
+                options.WorkerCount = 1;
+                options.Queues = new[] { "pdf" };
+            });
+
+            services.AddHangfireServer(options =>
+            {
+                options.ServerName = $"{Environment.MachineName}:jpg";
+                options.WorkerCount = 1;
+                options.Queues = new[] { "jpg" };
             });
 
             services.AddHttpClient<SeleniumZakupkiKonturScraper>();
 
             services.AddScoped<ITenderPlatformProcessor, ZakupkiKonturProcessor>();
             services.AddScoped<IDocumentTextExtractorFactory, DocumentTextExtractorFactory>();
-
             services.AddScoped<IPdfDocumentTextExtractor, OuterTextExtractor>();
             services.AddScoped<IImageDocumentTextExtractor, OuterTextExtractor>();
             services.AddScoped<IDocDocumentTextExtractor, OuterTextExtractor>();
@@ -69,7 +84,6 @@ namespace TenderDocumentsScraper
             services.AddScoped<IXlsxDocumentTextExtractor, OuterTextExtractor>();
             services.AddScoped<ITxtDocumentTextExtractor, InnerTextExtractor>();
             services.AddScoped<NamedPipeClient_TextExtractionService>();
-
             services.AddScoped<ITemporaryStoragePathProvider, TemporaryStoragePathProvider>();
             services.AddScoped<IZakupkiKonturScraper, SeleniumZakupkiKonturScraper>();
             services.AddScoped<IZakupkiKonturTenderBuilder, ZakupkiKonturTenderBuilder>();
@@ -77,10 +91,8 @@ namespace TenderDocumentsScraper
             services.AddScoped<DownloadFileClient>();
             services.AddScoped<FileService>();
             services.AddScoped<IZakupkiKonturMailParser, ZakupkiKonturMailParser>();
-
             //services.AddScoped<IZakupkiKonturTenderLinkProvider, ZakupkiKonturDummyEmailTenderLinkProvider>();
             services.AddScoped<IZakupkiKonturTenderMailProvider, ZakupkiKonturEWSEmailTenderMailProvider>();
-
             services.AddScoped<EWSMailProvider>();
             services.AddScoped<IMailFilteringConfigurationProvider, DBMailFilteringConfigurationProvider>();
             services.AddScoped<IEWSConfigurationProvider, DBEWSConfigurationProvider>();
@@ -116,11 +128,8 @@ namespace TenderDocumentsScraper
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
             app.UseRouting();
-
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

@@ -20,7 +20,7 @@ namespace IRobotAlina.Web.Services.TextExtractor
             context.Dispose();
         }
 
-        [Queue("beta")]
+        [Queue("main")]
         public async Task Execute(Guid id)
         {
             var tenderAttachment = context.TenderFileAttachments.FirstOrDefault(x => x.Id == id);

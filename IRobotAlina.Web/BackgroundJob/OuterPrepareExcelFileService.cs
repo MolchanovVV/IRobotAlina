@@ -32,7 +32,7 @@ namespace IRobotAlina.Web.BackgroundJob
             dbContext.Dispose();
         }
 
-        [Queue("beta")]
+        [Queue("main")]
         public async Task Execute(int mailId, string fileName, byte[] content)        
         {
             var tenderMailFile = dbContext.TenderMailFiles.FirstOrDefault(x => x.TenderMailId == mailId && x.Type == Data.Entities.Enums.ETenderMailFileType.TenderAdditionalPart );
