@@ -50,7 +50,7 @@ namespace TenderDocumentsScraper
             );
 
             services.AddHangfire(x => x.UseSqlServerStorage(Configuration.GetConnectionString("DefaultConnection")));
-           
+            
             services.AddHangfireServer(options =>
             {
                 options.ServerName = $"{Environment.MachineName}:main";
@@ -100,7 +100,7 @@ namespace TenderDocumentsScraper
             services.AddScoped<ValidateConfigurationSettings>();
             services.AddScoped<IPrepareExcelFile, PrepareExcelFile>();
             services.AddScoped<NamedPipeClient_PrepareExcelFileService>();
-            services.AddScoped<OuterTextExtractionService>();
+            services.AddScoped<IOuterTextExtractionService, OuterTextExtractionService>();
             services.AddScoped<ITenderMailFileProvider, TenderMailFileProvider>();
             services.AddScoped<IParseTenderAdditionalPartExcelData, ParseTenderAdditionalPartExcelData>();
             services.AddScoped<IHeartbeatProvider, HeartbeatProvider>();
